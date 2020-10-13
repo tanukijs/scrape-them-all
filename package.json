@@ -1,8 +1,8 @@
 {
   "name": "scrape-them-all",
   "version": "1.0.0",
-  "description": "Easily scrape data from the web",
-  "main": "index.js",
+  "description": "🚀 An easy-to-handle Node.js scraper that allow you to scrape them all in a record time.",
+  "main": "lib/index.js",
   "repository": "https://github.com/tanukijs/scrape-them-all.git",
   "author": "Tanuki",
   "license": "MIT",
