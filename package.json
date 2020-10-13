@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "https://github.com/tanukijs/scrape-them-all.git",
   "author": "Tanuki",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3"
+  }
 }
