@@ -1,3 +1,6 @@
+![Scrape Them All](https://i.imgur.com/6XSf7Va.png)
+**Scrape Them All** try to be easy to use as possible. If you have any suggestion or something not working as you want, please let us know and we'll think and be happy about it.
+
 # 📦 Installation
 ```sh
 # Using NPM
@@ -8,8 +11,6 @@ yarn add scraper-them-all
 ```
 
 # 🚀 Let's begin
-Scrape Them All try to be easy to use as possible. If you have any suggestion or something not working as you want, please let us know and we'll think about it.
-
 ## Data model options
 - `selector` _(String, Object)_ Can be a string expression, DOM Element, array of DOM elements, or cheerio object.
 - `isListItem` _(Boolean)_ Indicates that the selector is the parent of a list. Default as false.
