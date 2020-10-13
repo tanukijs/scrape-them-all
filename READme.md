@@ -1,4 +1,4 @@
-![Scrape Them All](https://i.imgur.com/6XSf7Va.png)
+![Scrape Them All](https://i.imgur.com/wxP325f.png)
 
 **Scrape Them All** try to be easy to use as possible. If you have any suggestion or something not working as you want, please let us know and we'll think and be happy about it.
 
