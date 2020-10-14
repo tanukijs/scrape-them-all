@@ -1,48 +1,48 @@
 {
-    "compilerOptions": {
-        /* Basic Options */
-        "target": "ESNext",
-        "module": "CommonJS",
-        "lib": ["ESNext", "DOM"],
-        "allowJs": true,
-        "checkJs": true,
-        "declaration": true,
-        "declarationMap": true,
-        "sourceMap": true,
-        "outDir": "lib",
-        "rootDir": "src",
-        "removeComments": true,
-        "importHelpers": true,
-        "downlevelIteration": true,
+  "compilerOptions": {
+    /* Basic Options */
+    "target": "ESNext",
+    "module": "CommonJS",
+    "lib": ["ESNext", "DOM"],
+    "allowJs": true,
+    "checkJs": true,
+    "declaration": true,
+    "declarationMap": false,
+    "sourceMap": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "removeComments": true,
+    "importHelpers": true,
+    "downlevelIteration": true,
 
-        /* Strict Type-Checking Options */
-        "strict": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true,
-        "strictFunctionTypes": true,
-        "strictBindCallApply": true,
-        "strictPropertyInitialization": true,
-        "noImplicitThis": true,
-        "alwaysStrict": true,
+    /* Strict Type-Checking Options */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
 
-        /* Additional Checks */
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
 
-        /* Module Resolution Options */
-        "moduleResolution": "node",
-        "resolveJsonModule": true,
-        "baseUrl": "./src",
-        "paths": {
-            "@/*": ["*"],
-        },
-        "esModuleInterop": true,
-
-        /* Advanced Options */
-        "forceConsistentCasingInFileNames": true
+    /* Module Resolution Options */
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "baseUrl": "./src",
+    "paths": {
+        "@/*": ["*"],
     },
-    "include": ["./src"],
-    "exclude": ["./node_modules", "./lib"]
+    "esModuleInterop": true,
+
+    /* Advanced Options */
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["./src"],
+  "exclude": ["./node_modules", "./lib"]
 }

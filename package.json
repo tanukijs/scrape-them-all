@@ -3,7 +3,7 @@
   "description": "🚀 An easy-to-handle Node.js scraper that allow you to scrape them all in a record time.",
   "version": "1.0.0",
   "license": "MIT",
-  "author": "Tanuki",
+  "author": "Tanuki <sapuraizu.off@gmail.com> (https://github.com/tanukijs)",
   "contributors": [
     "Aperrix <aperrix@gmail.com> (https://github.com/Aperrix)"
   ],
@@ -13,15 +13,15 @@
   "scripts": {
     "lint": "npm run build && eslint --ext .ts --ignore-path .gitignore .",
     "lintfix": "npm run build && eslint --fix --ext .ts --ignore-path .gitignore .",
-    "build": "rimraf lib && tsc -p tsconfig.json",
+    "build": "rimraf dist && tsc -p tsconfig.json",
     "test": ""
   },
   "dependencies": {
-    "@types/cheerio": "^0.22.22",
     "cheerio": "^1.0.0-rc.3",
     "module-alias": "^2.2.2"
   },
   "devDependencies": {
+    "@types/cheerio": "^0.22.22",
     "@types/module-alias": "^2.0.0",
     "@types/node": "^14.11.8",
     "@typescript-eslint/eslint-plugin": "^4.4.1",
