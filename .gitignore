@@ -117,3 +117,4 @@ dist
 
 # exclusive use of yarn
 .package-lock.json
+local
