@@ -10,8 +10,8 @@ interface ISelectorOptions {
   readonly isListItem?: boolean
   readonly isTrimmed?: boolean
   readonly attribute?: string
-  readonly accessor?: string | ((node: cheerio.Cheerio) => string | number | boolean)
-  readonly transformer?: (x: unknown) => unknown
+  readonly accessor?: string | (<T>(node: cheerio.Cheerio) => T)
+  readonly transformer?: <T>(value: string) => T
   readonly dataModel?: IDataModel
 }
 
