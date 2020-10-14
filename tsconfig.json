@@ -30,6 +30,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "suppressImplicitAnyIndexErrors": true,
 
     /* Module Resolution Options */
     "moduleResolution": "node",

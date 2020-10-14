@@ -1,24 +1,12 @@
-import req from './request'
-import transform from './transform'
-
-export interface IScrapeOptions {
-  selector?: string
-  isListItem?: boolean
-  isTrimmed?: boolean
-  attribute?: string
-  accessor?: string | ((node: cheerio.Cheerio) => string | number | boolean)
-  transformer?: (x: unknown) => typeof x
-  dataModel?: Record<string, string | IScrapeOptions>
-}
-
-export interface ISchema {
-  [key: string]: string | IScrapeOptions
-}
+import { RequestOptions } from 'https'
+import request from './Requestor'
+import DataModeler, { ISelector } from './DataModeler'
 
 export default async function ScrapeTA(
-  url: string,
-  schema: ISchema
-): Promise<IScrapeOptions> {
-  const target = await req(url)
-  return transform(target, schema)
+  query: string | URL | RequestOptions,
+  schema: { [key: string]: ISelector }
+): Promise<unknown> {
+  const queryHTML = await request(query)
+  const dataModeler = new DataModeler(queryHTML)
+  return dataModeler.generate(schema)
 }
