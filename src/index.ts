@@ -8,14 +8,14 @@ interface CustomParams {
 
 type QueryInfo = RequestInfo | (RequestInit & CustomParams)
 
-function withCookies(query: CustomParams) {
+function withCookies(query: CustomParams): typeof nodeFetch {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { default: fetchCookie } = require('fetch-cookie/node-fetch')
     const cookieJar = typeof query.cookieJar === 'boolean' ? null : query.cookieJar
     return fetchCookie(nodeFetch, cookieJar) as typeof nodeFetch
   } catch (e) {
-    throw new Error('Please run `npm install fetch-cookie` to use this setting.')
+    throw new Error('Please run `npm install fetch-cookie` to use the cookieJar option.')
   }
 }
 
