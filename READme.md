@@ -5,11 +5,12 @@
 # 📦 Installation
 ```sh
 # Using NPM
-npm install --save scrape-them-all
+npm install --save scrape-them-all fetch-cookie
 
 # Using Yarn
-yarn add scrape-them-all
+yarn add scrape-them-all fetch-cookie
 ```
+`fetch-cookie` is only required if you plan to use the `cookieJar` option on requests.
 
 # 🚀 Let's begin
 ## Data model options
