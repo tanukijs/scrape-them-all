@@ -47,7 +47,7 @@ yarn add scrape-them-all
 
 ## The code that goes with it
 ```js
-const { default: ScrapeTA } = require('scrape-them-all')
+const { ScrapeTA } = require('scrape-them-all')
 ScrapeTA('url_or_https_options', {
   title: '.header h1',
   description: {
