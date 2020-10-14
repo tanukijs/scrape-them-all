@@ -1,24 +1,21 @@
 import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
 import DataModeler, { ISelector } from './DataModeler'
 
-type ConfigureOptions = {
-  enableCookies: boolean
+interface CustomParams {
+  url: RequestInfo
+  cookieJar: boolean | unknown
 }
-type QueryInfo = RequestInfo | (RequestInit & { url: RequestInfo })
 
-let fetch = nodeFetch
+type QueryInfo = RequestInfo | (RequestInit & CustomParams)
 
-export async function configure(options: ConfigureOptions): Promise<void> {
-  if (options.enableCookies) {
-    try {
-      const { default: fetchCookie } = await require('fetch-cookie/node-fetch')
-      fetch = fetchCookie(nodeFetch) as typeof nodeFetch
-    } catch (e) {
-      fetch = nodeFetch
-      throw new Error('Please run `npm install fetch-cookie` to use this setting.')
-    }
-  } else {
-    fetch = nodeFetch
+function withCookies(query: CustomParams) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { default: fetchCookie } = require('fetch-cookie/node-fetch')
+    const cookieJar = typeof query.cookieJar === 'boolean' ? null : query.cookieJar
+    return fetchCookie(nodeFetch, cookieJar) as typeof nodeFetch
+  } catch (e) {
+    throw new Error('Please run `npm install fetch-cookie` to use this setting.')
   }
 }
 
@@ -26,6 +23,10 @@ export async function ScrapeTA(
   query: QueryInfo,
   schema: { [key: string]: ISelector }
 ): Promise<unknown> {
+  const fetch =
+    typeof query === 'object' && 'cookieJar' in query && query.cookieJar
+      ? withCookies(query)
+      : nodeFetch
   const requestInfo = ((typeof query === 'object' && 'url' in query && query.url) ||
     query) as RequestInfo
   const requestInit = typeof query === 'object' ? (query as RequestInit) : undefined
