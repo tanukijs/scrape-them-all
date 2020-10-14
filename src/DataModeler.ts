@@ -42,7 +42,7 @@ export default class {
   }
 
   private normalizeItem(item: string | ISelectorOptions): ISelectorOptions {
-    const isObject = typeof item === typeof 'string' && item !== null
+    const isObject = typeof item === 'object' && item !== null
     const options: ISelectorOptions = {
       selector: !isObject ? (item as string) : (item as ISelectorOptions).selector || '',
       isListItem: !isObject ? false : (item as ISelectorOptions).isListItem || false,
@@ -72,7 +72,7 @@ export default class {
         ? node[item.accessor]()
         : null
 
-    if (item.attribute !== null) value = node.attr(item.attribute as string)
+    if (item.attribute) value = node.attr(item.attribute as string)
     if (item.isTrimmed && value) value = value.trim()
     if (typeof item.transformer === 'function') value = item.transformer(value)
 
