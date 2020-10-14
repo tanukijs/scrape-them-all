@@ -7,7 +7,6 @@
   "contributors": [
     "Aperrix <aperrix@gmail.com> (https://github.com/Aperrix)"
   ],
-  "type": "module",
   "source": "src/index.ts",
   "main": "dist/index.js",
   "scripts": {
