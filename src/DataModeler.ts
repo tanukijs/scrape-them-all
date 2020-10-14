@@ -31,9 +31,13 @@ export default class {
       const item = this.normalizeItem(dataModel[key])
       if (item.selector === null) continue
 
+      const cheerioElement = context
+        ? this.$root(item.selector, context)
+        : this.$root(item.selector)
+
       const value = !item.isListItem
-        ? this.processSingleItem(item, context)
-        : this.processMultipleItems(item, context)
+        ? this.processSingleItem(cheerioElement, item)
+        : this.processMultipleItems(cheerioElement, item)
 
       mappedResult[key] = await (Array.isArray(value) ? Promise.all(value) : value)
     }
@@ -61,18 +65,17 @@ export default class {
   }
 
   private processSingleItem(
-    item: ISelectorOptions,
-    context?: cheerio.Element
+    element: cheerio.Cheerio,
+    item: ISelectorOptions
   ): ISelectorOptions {
-    const node = context ? this.$root(item.selector, context) : this.$root(item.selector)
     let value =
       typeof item.accessor === 'function'
-        ? item.accessor(node)
-        : typeof item.accessor === 'string' && typeof node[item.accessor] !== undefined
-        ? node[item.accessor]()
+        ? item.accessor(element)
+        : typeof item.accessor === 'string' && typeof element[item.accessor] !== undefined
+        ? element[item.accessor]()
         : null
 
-    if (item.attribute) value = node.attr(item.attribute as string)
+    if (item.attribute) value = element.attr(item.attribute as string)
     if (item.isTrimmed && value) value = value.trim()
     if (typeof item.transformer === 'function') value = item.transformer(value)
 
@@ -80,14 +83,13 @@ export default class {
   }
 
   private processMultipleItems(
-    item: ISelectorOptions,
-    context?: cheerio.Element
+    element: cheerio.Cheerio,
+    item: ISelectorOptions
   ): Promise<unknown>[] {
     if (!item.dataModel) return []
-    const nodes = context ? this.$root(item.selector, context) : this.$root(item.selector)
     const values = []
 
-    for (const node of nodes.toArray()) {
+    for (const node of element.toArray()) {
       const value = this.generate(item.dataModel, node)
       values.push(value)
     }
