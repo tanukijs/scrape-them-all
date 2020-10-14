@@ -15,9 +15,7 @@ export async function configure(options: ConfigureOptions): Promise<void> {
       fetch = fetchCookie(nodeFetch) as typeof nodeFetch
     } catch (e) {
       fetch = nodeFetch
-      console.error(
-        new Error('Please run `npm install fetch-cookie` to use this setting.')
-      )
+      throw new Error('Please run `npm install fetch-cookie` to use this setting.')
     }
   } else {
     fetch = nodeFetch
