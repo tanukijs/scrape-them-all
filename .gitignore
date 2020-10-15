@@ -116,5 +116,5 @@ dist
 .pnp.*
 
 # exclusive use of yarn
-.package-lock.json
+package-lock.json
 local

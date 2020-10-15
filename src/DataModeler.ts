@@ -6,7 +6,7 @@ type ISelector = string | ISelectorOptions
 /* eslint-enable no-use-before-define */
 
 interface ISelectorOptions {
-  readonly selector?: string
+  readonly selector: string
   readonly isListItem?: boolean
   readonly isTrimmed?: boolean
   readonly attribute?: string
@@ -32,10 +32,9 @@ export default class {
 
     for (const key in dataModel) {
       const item = this.normalizeItem(dataModel[key])
-      if (item.selector === null) continue
 
       const cheerioElement = context
-        ? this.$root(item.selector as string, context)
+        ? this.$root(item.selector, context)
         : this.$root(item.selector)
 
       const value = !item.isListItem
@@ -67,10 +66,7 @@ export default class {
     return Object.freeze(options)
   }
 
-  private processSingleItem(
-    element: cheerio.Cheerio,
-    item: ISelectorOptions
-  ): ISelectorOptions {
+  private processSingleItem(element: cheerio.Cheerio, item: ISelectorOptions): unknown {
     let value =
       typeof item.accessor === 'function'
         ? item.accessor(element)
