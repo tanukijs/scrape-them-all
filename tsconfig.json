@@ -44,6 +44,6 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["./src", "__tests__/old.ts"],
+  "include": ["./src"],
   "exclude": ["./node_modules", "./dist"]
 }
