@@ -6,8 +6,14 @@ interface CustomParams {
   cookieJar?: boolean | unknown
 }
 
-type QueryInfo = RequestInfo | (RequestInit & CustomParams)
+type TQueryInfo = RequestInfo | (RequestInit & CustomParams)
 
+/**
+ * FUNCTION DESC
+ *
+ * @param {CustomParams} query
+ * @returns {typeof nodeFetch}
+ */
 function withCookies(query: CustomParams): typeof nodeFetch {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,8 +25,16 @@ function withCookies(query: CustomParams): typeof nodeFetch {
   }
 }
 
+/**
+ * FUNCTION DESC
+ *
+ * @export
+ * @param {QueryInfo} query
+ * @param {IScheme} schema
+ * @returns {Promise<Record<string, unknown>>}
+ */
 export async function ScrapeTA(
-  query: QueryInfo,
+  query: TQueryInfo,
   schema: IScheme
 ): Promise<Record<string, unknown>> {
   const fetch =

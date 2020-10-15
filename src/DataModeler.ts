@@ -27,18 +27,16 @@ class SelectorOptions {
   }
 }
 
-interface IScheme {
+export interface IScheme {
   [key: string]: string | Partial<SelectorOptions> | IScheme
 }
 
-enum EValueType {
+export enum EValueType {
   SIMPLE,
   LIST,
   LIST_OBJECT,
   NESTED
 }
-
-export { IScheme, SelectorOptions }
 
 export default class {
   private $root: cheerio.Root
@@ -47,6 +45,13 @@ export default class {
     this.$root = cheerio.load(body)
   }
 
+  /**
+   * FUNCTION DESC
+   *
+   * @param {IScheme} dataModel
+   * @param {cheerio.Cheerio} [context]
+   * @returns {Promise<Record<string, unknown>>}
+   */
   async generate(
     dataModel: IScheme,
     context?: cheerio.Cheerio
@@ -81,6 +86,14 @@ export default class {
     return mappedResult
   }
 
+  /**
+   * FUNCTION DESC
+   *
+   * @private
+   * @template K
+   * @param {IScheme[K]} scheme
+   * @returns {(EValueType | void)}
+   */
   private getValueType<K extends keyof IScheme>(scheme: IScheme[K]): EValueType | void {
     if (typeof scheme === 'string') return EValueType.SIMPLE
     else if (typeof scheme === 'object') {
@@ -98,6 +111,14 @@ export default class {
     }
   }
 
+  /**
+   * FUNCTION DESC
+   *
+   * @private
+   * @param {cheerio.Cheerio} element
+   * @param {SelectorOptions} opts
+   * @returns {unknown}
+   */
   private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
     let value =
       typeof opts.accessor === 'function'
@@ -113,6 +134,14 @@ export default class {
     return value
   }
 
+  /**
+   * FUNCTION DESC
+   *
+   * @private
+   * @param {cheerio.Cheerio} element
+   * @param {SelectorOptions} opts
+   * @returns {unknown[]}
+   */
   private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown[] {
     if (!opts.listModel) return []
     const values = []
@@ -125,6 +154,14 @@ export default class {
     return values
   }
 
+  /**
+   * FUNCTION DESC
+   *
+   * @private
+   * @param {cheerio.Cheerio} element
+   * @param {SelectorOptions} opts
+   * @returns {Promise<Record<string, unknown>>[]}
+   */
   private processListObjectItem(
     element: cheerio.Cheerio,
     opts: SelectorOptions
