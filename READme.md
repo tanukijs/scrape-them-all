@@ -17,13 +17,12 @@ yarn add scrape-them-all fetch-cookie
 
 |    Option     |         Type          |                                                               Description                                                                |
 |---------------|-----------------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| **selector**    | `String` or `Object`    | Can be a string expression, DOM Element, array of DOM elements, or cheerio object.                                                       |
-| **isListItem**  | `Boolean`           | Indicates that the selector is the parent of a list. Default as false.                                                                   |
+| **selector**    | `String` or `Object`    | Can be a string expression, DOM Element, array of DOM elements, or cheerio object.                                                       |                                                            |
 | **isTrimmed**   | `Boolean`           | Trim whitespaces in the result. Default as true.                                                                                         |
 | **attribute**   | `String`            | Return the value of the indicated attribute on the selected element.                                                                     |
 | **accessor**    | `String` or `Function`  | Cheerio access method name (like "`html`" for returning html code) or a custom function that take a Cheerio instance as first parameter. |
 | **transformer** | `Function`          | The first parameter is your current value for the selected item. Can return a `Promise`.                                                 |
-| **dataModel**   | `Object`            | Contains the options stated above in case of a list.                                                                                     |
+| **listModel**   | `Object`            | Contains the options stated above in case of a list.                                                                                     |
 
 
 ## Example output
@@ -67,8 +66,7 @@ ScrapeTA('url_or_https_options', {
   },
   users: {
     selector: '.body .users',
-    isListItem: true,
-    dataModel: {
+    listModel: {
       username: '.username',
       badges: {
         selector: '.badges',
