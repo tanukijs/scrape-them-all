@@ -5,7 +5,7 @@ import { join } from 'path'
 
 describe('Scrape-them-all', () => {
   let server: Server
-
+  const port = 8080
   beforeAll((done) => {
     server = createServer((_req, res) => {
       const indexPath = join(__dirname, 'public/index.html')
@@ -13,7 +13,7 @@ describe('Scrape-them-all', () => {
       res.write(indexHTML)
       res.end()
     })
-    server.listen(8080, () => done() && console.log('Server running on port 8080'))
+    server.listen(port, () => done() && console.log('Server running on port 8080'))
   })
 
   afterAll((done) => {
@@ -22,7 +22,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape simple data', async () => {
-    const data = await ScrapeTA('http://localhost:8080', {
+    const data = await ScrapeTA(`http://localhost:${port}`, {
       title: 'h1.title',
       description: '.description',
       date: {
@@ -38,7 +38,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape lists', async () => {
-    const data = await ScrapeTA('http://localhost:8080', {
+    const data = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: 'li'
@@ -50,7 +50,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape and transform lists', async () => {
-    const data = await ScrapeTA('http://localhost:8080', {
+    const data = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: 'li',
@@ -58,7 +58,65 @@ describe('Scrape-them-all', () => {
       }
     })
     expect(data).toEqual({
-      features: ['1', '2', '3', '4', '5', '6']
+      features: [1, 2, 3, 4, 5, 6]
+    })
+  })
+
+  test('scrape nested objects', async () => {
+    const data = await ScrapeTA(`http://localhost:${port}`, {
+      nested: {
+        selector: '.nested',
+        listModel: {
+          foo: {
+            selector: '',
+            listModel: {
+              level1: {
+                selector: '.level1',
+                listModel: {
+                  level2: {
+                    selector: 'span',
+                    accessor: (x) => x.eq(1).text()
+                  }
+                }
+              },
+              level1Text: 'span',
+              level2Text: '.level2'
+            }
+          }
+        }
+      }
+    })
+    expect(data).toEqual({
+      nested: {
+        foo: {
+          level1: {
+            level2: '2'
+          },
+          level2Text: '2',
+          level1Text: 'Foo12'
+        }
+      }
+    })
+  })
+
+  test('scrape and transform lists', async () => {
+    const data = await ScrapeTA(`http://localhost:${port}`, {
+      addresses: {
+        selector: 'table tbody tr',
+        listModel: {
+          address: '.address',
+          city: {
+            selector: '',
+            accessor: (x) => x.closest('table').find('thead .city').text()
+          }
+        }
+      }
+    })
+    expect(data).toEqual({
+      addresses: [
+        { address: 'one way street', city: 'Sydney' },
+        { address: 'GT Road', city: 'Sydney' }
+      ]
     })
   })
 })
