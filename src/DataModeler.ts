@@ -7,12 +7,11 @@ type ISelector = string | ISelectorOptions
 
 interface ISelectorOptions {
   readonly selector: string
-  readonly isListItem?: boolean
   readonly isTrimmed?: boolean
   readonly attribute?: string
   readonly accessor?: string | ((node: cheerio.Cheerio) => unknown)
   readonly transformer?: (value: string) => unknown
-  readonly dataModel?: IDataModel
+  readonly listModel?: IDataModel
 }
 
 export { IDataModel, ISelector, ISelectorOptions }
@@ -37,7 +36,7 @@ export default class {
         ? this.$root(item.selector, context)
         : this.$root(item.selector)
 
-      const value = !item.isListItem
+      const value = !item.listModel
         ? this.processSingleItem(cheerioElement, item)
         : this.processMultipleItems(cheerioElement, item)
 
@@ -51,7 +50,6 @@ export default class {
     const isObject = typeof item === 'object' && item !== null
     const options: ISelectorOptions = {
       selector: !isObject ? (item as string) : (item as ISelectorOptions).selector || '',
-      isListItem: !isObject ? false : (item as ISelectorOptions).isListItem || false,
       isTrimmed: !isObject ? true : (item as ISelectorOptions).isTrimmed || true,
       attribute: !isObject
         ? undefined
@@ -60,7 +58,7 @@ export default class {
       transformer: !isObject
         ? undefined
         : (item as ISelectorOptions).transformer || undefined,
-      dataModel: !isObject ? undefined : (item as ISelectorOptions).dataModel || undefined
+      listModel: !isObject ? undefined : (item as ISelectorOptions).listModel || undefined
     }
 
     return Object.freeze(options)
@@ -85,11 +83,11 @@ export default class {
     element: cheerio.Cheerio,
     item: ISelectorOptions
   ): Promise<Record<string, unknown>>[] {
-    if (!item.dataModel) return []
+    if (!item.listModel) return []
     const values = []
 
     for (const node of element.toArray()) {
-      const value = this.generate(item.dataModel, node)
+      const value = this.generate(item.listModel, node)
       values.push(value)
     }
 
