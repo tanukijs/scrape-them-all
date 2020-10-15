@@ -11,7 +11,7 @@ type QueryInfo = RequestInfo | (RequestInit & CustomParams)
 function withCookies(query: CustomParams): typeof nodeFetch {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { default: fetchCookie } = require('fetch-cookie/node-fetch')
+    const fetchCookie = require('fetch-cookie/node-fetch')
     const cookieJar = typeof query.cookieJar === 'boolean' ? null : query.cookieJar
     return fetchCookie(nodeFetch, cookieJar) as typeof nodeFetch
   } catch (e) {
