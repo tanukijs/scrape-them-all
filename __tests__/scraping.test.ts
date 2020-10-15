@@ -42,8 +42,8 @@ describe('Scrape-them-all', () => {
   test('scrape lists', async () => {
     const data = await ScrapeTA('http://localhost:8080', {
       features: {
-        isListItem: true,
-        selector: '.features > li'
+        selector: '.features',
+        listModel: 'li'
       }
     })
     expect(data).toEqual({
@@ -53,8 +53,8 @@ describe('Scrape-them-all', () => {
   test('scrape and transform lists', async () => {
     const data = await ScrapeTA('http://localhost:8080', {
       features: {
-        isListItem: true,
-        selector: '.features > li',
+        selector: '.features',
+        listModel: 'li',
         transformer: (x) => parseInt(x, 10)
       }
     })
@@ -66,16 +66,16 @@ describe('Scrape-them-all', () => {
     const data = await ScrapeTA('http://localhost:8080', {
       nested: {
         selector: '.nested',
-        dataModel: {
+        listModel: {
           foo: {
             selector: '',
-            dataModel: {
+            listModel: {
               level1: {
                 selector: '.level1',
-                dataModel: {
+                listModel: {
                   level2: {
                     selector: 'span',
-                    accessor: (x) => x.eq(1)
+                    accessor: (x) => x.eq(1).text()
                   }
                 }
               },
@@ -102,8 +102,7 @@ describe('Scrape-them-all', () => {
     const data = await ScrapeTA('http://localhost:8080', {
       addresses: {
         selector: 'table tbody tr',
-        isListItem: true,
-        dataModel: {
+        listModel: {
           address: '.address',
           suburb: {
             selector: '',
