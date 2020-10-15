@@ -3,7 +3,7 @@ import DataModeler, { ISelector } from './DataModeler'
 
 interface CustomParams {
   url: RequestInfo
-  cookieJar: boolean | unknown
+  cookieJar?: boolean | unknown
 }
 
 type QueryInfo = RequestInfo | (RequestInit & CustomParams)

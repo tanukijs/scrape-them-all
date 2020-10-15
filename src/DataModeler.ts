@@ -6,7 +6,7 @@ type ISelector = string | ISelectorOptions
 /* eslint-enable no-use-before-define */
 
 interface ISelectorOptions {
-  readonly selector: string
+  readonly selector?: string
   readonly isListItem?: boolean
   readonly isTrimmed?: boolean
   readonly attribute?: string
@@ -24,15 +24,18 @@ export default class {
     this.$root = cheerio.load(body)
   }
 
-  async generate(dataModel: IDataModel, context?: cheerio.Element): Promise<unknown> {
-    const mappedResult: Record<string, unknown> = {}
+  async generate(
+    dataModel: IDataModel,
+    context?: cheerio.Element
+  ): Promise<Record<string, unknown>> {
+    const mappedResult = {}
 
     for (const key in dataModel) {
       const item = this.normalizeItem(dataModel[key])
       if (item.selector === null) continue
 
       const cheerioElement = context
-        ? this.$root(item.selector, context)
+        ? this.$root(item.selector as string, context)
         : this.$root(item.selector)
 
       const value = !item.isListItem
@@ -85,7 +88,7 @@ export default class {
   private processMultipleItems(
     element: cheerio.Cheerio,
     item: ISelectorOptions
-  ): Promise<unknown>[] {
+  ): Promise<Record<string, unknown>>[] {
     if (!item.dataModel) return []
     const values = []
 
