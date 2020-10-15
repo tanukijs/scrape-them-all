@@ -31,7 +31,7 @@ interface IScheme {
   [key: string]: string | Partial<SelectorOptions> | IScheme
 }
 
-enum ValueTypeEnum {
+enum EValueType {
   SIMPLE,
   LIST,
   LIST_OBJECT,
@@ -57,7 +57,7 @@ export default class {
       const value = dataModel[key]
       const type = this.getValueType(value)
 
-      if (type === ValueTypeEnum.NESTED) {
+      if (type === EValueType.NESTED) {
         mappedResult[key] = await this.generate(value as IScheme, context)
         continue
       }
@@ -68,11 +68,11 @@ export default class {
           ? this.$root(opts.selector, context)
           : context || this.$root(opts.selector)
       const result =
-        type === ValueTypeEnum.SIMPLE
+        type === EValueType.SIMPLE
           ? this.processSingleItem(cheerioRoot, opts)
-          : type === ValueTypeEnum.LIST
+          : type === EValueType.LIST
           ? this.processListItem(cheerioRoot, opts)
-          : type === ValueTypeEnum.LIST_OBJECT
+          : type === EValueType.LIST_OBJECT
           ? this.processListObjectItem(cheerioRoot, opts)
           : undefined
       mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
@@ -81,22 +81,20 @@ export default class {
     return mappedResult
   }
 
-  private getValueType<K extends keyof IScheme>(
-    scheme: IScheme[K]
-  ): ValueTypeEnum | void {
-    if (typeof scheme === 'string') return ValueTypeEnum.SIMPLE
+  private getValueType<K extends keyof IScheme>(scheme: IScheme[K]): EValueType | void {
+    if (typeof scheme === 'string') return EValueType.SIMPLE
     else if (typeof scheme === 'object') {
-      const opts: SelectorOptions = scheme as SelectorOptions
+      const opts = scheme as SelectorOptions
       const isSimple =
         SelectorOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
-      if (isSimple) return ValueTypeEnum.SIMPLE
+      if (isSimple) return EValueType.SIMPLE
 
       const isList = opts.selector && opts.listModel
       const isObjectList =
-        isList && this.getValueType(opts.listModel || {}) !== ValueTypeEnum.SIMPLE
-      if (isObjectList) return ValueTypeEnum.LIST_OBJECT
-      if (isList) return ValueTypeEnum.LIST
-      return ValueTypeEnum.NESTED
+        isList && this.getValueType(opts.listModel || {}) !== EValueType.SIMPLE
+      if (isObjectList) return EValueType.LIST_OBJECT
+      if (isList) return EValueType.LIST
+      return EValueType.NESTED
     }
   }
 

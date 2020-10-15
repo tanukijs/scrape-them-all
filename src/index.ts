@@ -19,7 +19,10 @@ function withCookies(query: CustomParams): typeof nodeFetch {
   }
 }
 
-export async function ScrapeTA(query: QueryInfo, schema: IScheme): Promise<unknown> {
+export async function ScrapeTA(
+  query: QueryInfo,
+  schema: IScheme
+): Promise<Record<string, unknown>> {
   const fetch =
     typeof query === 'object' && 'cookieJar' in query && query.cookieJar
       ? withCookies(query)

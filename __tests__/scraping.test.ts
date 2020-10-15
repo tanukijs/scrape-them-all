@@ -85,14 +85,14 @@ describe('Scrape-them-all', () => {
           level1: {
             level2: '2'
           },
-          level1Text: 'Foo12',
-          level2Text: '2'
+          level2Text: '2',
+          level1Text: 'Foo12'
         }
       }
     })
   })
 
-  test('scrape and transform lists', async () => {
+  test('scrape closest sample', async () => {
     const data = await ScrapeTA(`http://localhost:${port}`, {
       addresses: {
         selector: 'table tbody tr',
