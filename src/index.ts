@@ -1,5 +1,5 @@
 import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
-import DataModeler, { ISelector } from './DataModeler'
+import DataModeler, { IScheme } from './DataModeler'
 
 interface CustomParams {
   url: RequestInfo
@@ -19,10 +19,7 @@ function withCookies(query: CustomParams): typeof nodeFetch {
   }
 }
 
-export async function ScrapeTA(
-  query: QueryInfo,
-  schema: { [key: string]: ISelector }
-): Promise<unknown> {
+export async function ScrapeTA(query: QueryInfo, schema: IScheme): Promise<unknown> {
   const fetch =
     typeof query === 'object' && 'cookieJar' in query && query.cookieJar
       ? withCookies(query)

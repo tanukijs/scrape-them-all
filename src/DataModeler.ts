@@ -1,20 +1,43 @@
 import cheerio from 'cheerio'
 
-/* eslint-disable no-use-before-define */
-type IDataModel = Record<string, string | ISelectorOptions>
-type ISelector = string | ISelectorOptions
-/* eslint-enable no-use-before-define */
-
-interface ISelectorOptions {
-  readonly selector: string
-  readonly isTrimmed?: boolean
+class SelectorOptions {
+  readonly selector: string = ''
+  readonly isTrimmed: boolean = true
+  readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
   readonly attribute?: string
-  readonly accessor?: string | ((node: cheerio.Cheerio) => unknown)
   readonly transformer?: (value: string) => unknown
-  readonly listModel?: IDataModel
+  // eslint-disable-next-line no-use-before-define
+  readonly listModel?: IScheme
+
+  constructor(opts: string | Partial<SelectorOptions> = '') {
+    if (typeof opts === 'string') {
+      this.selector = opts
+    } else {
+      this.selector = opts.selector || ''
+      this.isTrimmed = opts.isTrimmed || true
+      this.accessor = opts.accessor || 'text'
+      this.attribute = opts.attribute
+      this.transformer = opts.transformer
+      this.listModel = opts.listModel
+    }
+  }
+
+  static get keys(): string[] {
+    return ['selector', 'isTrimmed', 'accessor', 'attribute', 'transformer', 'listModel']
+  }
 }
 
-export { IDataModel, ISelector, ISelectorOptions }
+interface IScheme {
+  [key: string]: string | Partial<SelectorOptions> | IScheme
+}
+
+enum ValueTypeEnum {
+  SIMPLE,
+  LIST,
+  NESTED
+}
+
+export { IScheme, SelectorOptions }
 
 export default class {
   private $root: cheerio.Root
@@ -24,73 +47,91 @@ export default class {
   }
 
   async generate(
-    dataModel: IDataModel,
+    dataModel: IScheme,
     context?: cheerio.Element
   ): Promise<Record<string, unknown>> {
     const mappedResult = {}
 
     for (const key in dataModel) {
-      const item = this.normalizeItem(dataModel[key])
+      const value = dataModel[key]
+      const type = this.getValueType(value)
+      console.log({ key, type })
 
-      const cheerioElement = context
-        ? this.$root(item.selector, context)
-        : this.$root(item.selector)
-
-      const value = !item.listModel
-        ? this.processSingleItem(cheerioElement, item)
-        : this.processMultipleItems(cheerioElement, item)
-
-      mappedResult[key] = await (Array.isArray(value) ? Promise.all(value) : value)
+      if (type === ValueTypeEnum.NESTED) {
+        mappedResult[key] = await this.generate(value as IScheme, context)
+      } else if (type === ValueTypeEnum.SIMPLE || type === ValueTypeEnum.LIST) {
+        const opts = new SelectorOptions(value)
+        const cheerioElement = context
+          ? this.$root(opts.selector, context)
+          : this.$root(opts.selector)
+        const result =
+          type === ValueTypeEnum.SIMPLE
+            ? this.processSingleItem(cheerioElement, opts)
+            : this.processListItem(cheerioElement, opts)
+        mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
+      }
     }
 
     return mappedResult
   }
 
-  private normalizeItem(item: string | ISelectorOptions): ISelectorOptions {
-    const isObject = typeof item === 'object' && item !== null
-    const options: ISelectorOptions = {
-      selector: !isObject ? (item as string) : (item as ISelectorOptions).selector || '',
-      isTrimmed: !isObject ? true : (item as ISelectorOptions).isTrimmed || true,
-      attribute: !isObject
-        ? undefined
-        : (item as ISelectorOptions).attribute || undefined,
-      accessor: !isObject ? 'text' : (item as ISelectorOptions).accessor || 'text',
-      transformer: !isObject
-        ? undefined
-        : (item as ISelectorOptions).transformer || undefined,
-      listModel: !isObject ? undefined : (item as ISelectorOptions).listModel || undefined
-    }
+  private getValueType<K extends keyof IScheme>(
+    scheme: IScheme[K]
+  ): ValueTypeEnum | void {
+    if (typeof scheme === 'string') return ValueTypeEnum.SIMPLE
+    else if (typeof scheme === 'object') {
+      const opts: SelectorOptions = scheme as SelectorOptions
+      const isSimple =
+        SelectorOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
+      const isList = opts.selector && opts.listModel
 
-    return Object.freeze(options)
+      return isSimple
+        ? ValueTypeEnum.SIMPLE
+        : isList
+        ? ValueTypeEnum.LIST
+        : ValueTypeEnum.NESTED
+    }
   }
 
-  private processSingleItem(element: cheerio.Cheerio, item: ISelectorOptions): unknown {
+  private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
     let value =
-      typeof item.accessor === 'function'
-        ? item.accessor(element)
-        : typeof item.accessor === 'string' && typeof element[item.accessor] !== undefined
-        ? element[item.accessor]()
+      typeof opts.accessor === 'function'
+        ? opts.accessor(element)
+        : typeof opts.accessor === 'string' && typeof element[opts.accessor] !== undefined
+        ? element[opts.accessor]()
         : null
 
-    if (item.attribute) value = element.attr(item.attribute as string)
-    if (item.isTrimmed && value) value = value.trim()
-    if (typeof item.transformer === 'function') value = item.transformer(value)
+    if (opts.attribute) value = element.attr(opts.attribute as string)
+    if (opts.isTrimmed && value) value = value.trim()
+    if (typeof opts.transformer === 'function') value = opts.transformer(value)
 
     return value
   }
 
-  private processMultipleItems(
-    element: cheerio.Cheerio,
-    item: ISelectorOptions
-  ): Promise<Record<string, unknown>>[] {
-    if (!item.listModel) return []
-    const values = []
+  private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
+    if (!opts.listModel) return []
+    const listOpts = new SelectorOptions(opts.listModel)
+    const type = this.getValueType(listOpts)
 
-    for (const node of element.toArray()) {
-      const value = this.generate(item.listModel, node)
-      values.push(value)
+    if (type === ValueTypeEnum.SIMPLE || type === ValueTypeEnum.LIST) {
+      const children = element.find(listOpts.selector)
+      const values = []
+      for (const child of children.toArray()) {
+        const value = this.processSingleItem(this.$root(child), listOpts)
+        values.push(value)
+      }
+      return values
     }
 
-    return values
+    if (type === ValueTypeEnum.NESTED) {
+      const values = []
+      for (const child of element.toArray()) {
+        const value = this.generate(opts.listModel, child)
+        values.push(value)
+      }
+      return values
+    }
+
+    return null
   }
 }
