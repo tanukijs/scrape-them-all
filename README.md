@@ -33,7 +33,7 @@ scrapeTA({url: 'https://google.com', cookieJar: true})
 
 # 📚 Documentation
 
-##``scrapeTA(query, schema)``
+### ``scrapeTA(query, schema)``
 
 Params:
 
