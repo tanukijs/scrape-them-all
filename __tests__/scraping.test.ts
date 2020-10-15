@@ -67,24 +67,15 @@ describe('Scrape-them-all', () => {
   test('scrape nested objects', async () => {
     const data = await ScrapeTA(`http://localhost:${port}`, {
       nested: {
-        selector: '.nested',
-        listModel: {
-          foo: {
-            selector: '',
-            listModel: {
-              level1: {
-                selector: '.level1',
-                listModel: {
-                  level2: {
-                    selector: 'span',
-                    accessor: (x) => x.eq(1).text()
-                  }
-                }
-              },
-              level1Text: 'span',
-              level2Text: '.level2'
+        foo: {
+          level1: {
+            level2: {
+              selector: '.nested .level1 span',
+              accessor: (x) => x.eq(1).text()
             }
-          }
+          },
+          level1Text: '.nested span',
+          level2Text: '.nested .level2'
         }
       }
     })
@@ -94,8 +85,8 @@ describe('Scrape-them-all', () => {
           level1: {
             level2: '2'
           },
-          level2Text: '2',
-          level1Text: 'Foo12'
+          level1Text: 'Foo12',
+          level2Text: '2'
         }
       }
     })
