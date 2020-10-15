@@ -1,27 +1,24 @@
-import http from 'http'
+import { ScrapeTA } from '../src'
+import { createServer, Server } from 'http'
+import { readFileSync } from 'fs'
 import { join } from 'path'
-import { promisify } from 'util'
-import { readFile } from 'fs'
-import { ScrapeTA } from '../src/index'
-const asyncReadFile = promisify(readFile)
 
 describe('Scrape-them-all', () => {
-  let server: http.Server
-  beforeAll(async (done) => {
-    const indexPath = join(__dirname, 'public/index.html')
-    const indexHTML = (await asyncReadFile(indexPath)).toString()
+  let server: Server
 
-    server = http
-      .createServer((_req, res) => {
-        res.writeHead(200)
-        res.write(indexHTML)
-        res.end()
-      })
-      .listen(8080, () => done && console.log('Node server running on port 8080'))
+  beforeAll((done) => {
+    server = createServer((_req, res) => {
+      const indexPath = join(__dirname, 'public/index.html')
+      const indexHTML = readFileSync(indexPath)
+      res.write(indexHTML)
+      res.end()
+    })
+    server.listen(8080, () => done() && console.log('Server running on port 8080'))
   })
 
   afterAll((done) => {
-    server.close(done)
+    server.close()
+    done()
   })
 
   test('scrape simple data', async () => {
@@ -39,6 +36,7 @@ describe('Scrape-them-all', () => {
       date: new Date('1988-01-01')
     })
   })
+
   test('scrape lists', async () => {
     const data = await ScrapeTA('http://localhost:8080', {
       features: {
@@ -50,65 +48,13 @@ describe('Scrape-them-all', () => {
       features: ['1', '2', '3', '4', '5', '6']
     })
   })
+
   test('scrape and transform lists', async () => {
     const data = await ScrapeTA('http://localhost:8080', {
       features: {
         selector: '.features',
         listModel: 'li',
         transformer: (x) => parseInt(x, 10)
-      }
-    })
-    expect(data).toEqual({
-      features: ['1', '2', '3', '4', '5', '6']
-    })
-  })
-  test('scrape nested objects', async () => {
-    const data = await ScrapeTA('http://localhost:8080', {
-      nested: {
-        selector: '.nested',
-        listModel: {
-          foo: {
-            selector: '',
-            listModel: {
-              level1: {
-                selector: '.level1',
-                listModel: {
-                  level2: {
-                    selector: 'span',
-                    accessor: (x) => x.eq(1).text()
-                  }
-                }
-              },
-              level1Text: 'span',
-              level2Text: '.level2'
-            }
-          }
-        }
-      }
-    })
-    expect(data).toEqual({
-      nested: {
-        foo: {
-          level1: {
-            level2: '2'
-          },
-          level2Text: '2',
-          level1Text: 'Foo12'
-        }
-      }
-    })
-  })
-  test('scrape and transform lists', async () => {
-    const data = await ScrapeTA('http://localhost:8080', {
-      addresses: {
-        selector: 'table tbody tr',
-        listModel: {
-          address: '.address',
-          suburb: {
-            selector: '',
-            accessor: (x) => x.closest('table').find('thead .city').text()
-          }
-        }
       }
     })
     expect(data).toEqual({
