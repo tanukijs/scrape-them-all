@@ -23,7 +23,7 @@ yarn add fetch-cookie #optional
 
 `fetch-cookie` is only required if you plan to use the `cookieJar` option on requests.
 
-⚠ If you get a ``too many redirects`` error when you scrape, we recommanded to install ``fetch-cookie`` and use the option ``cookieJar: true`` in your request
+**⚠ If you get a ``too many redirects`` error when you scrape, we recommend to install ``fetch-cookie`` and use the option ``cookieJar: true`` in your request.**
 
 Exemple:
 ```js
