@@ -53,8 +53,10 @@ describe('Scrape-them-all', () => {
     const data = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
-        listModel: 'li',
-        transformer: (x) => parseInt(x, 10)
+        listModel: {
+          selector: 'li',
+          transformer: (x) => parseInt(x, 10)
+        }
       }
     })
     expect(data).toEqual({
