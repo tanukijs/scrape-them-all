@@ -34,6 +34,7 @@ interface IScheme {
 enum ValueTypeEnum {
   SIMPLE,
   LIST,
+  LIST_OBJECT,
   NESTED
 }
 
@@ -48,26 +49,30 @@ export default class {
 
   async generate(
     dataModel: IScheme,
-    context?: cheerio.Element
+    context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
     const mappedResult = {}
 
     for (const key in dataModel) {
       const value = dataModel[key]
       const type = this.getValueType(value)
-      console.log({ key, type })
 
       if (type === ValueTypeEnum.NESTED) {
         mappedResult[key] = await this.generate(value as IScheme, context)
-      } else if (type === ValueTypeEnum.SIMPLE || type === ValueTypeEnum.LIST) {
+      } else if (
+        type === ValueTypeEnum.SIMPLE ||
+        type === ValueTypeEnum.LIST ||
+        type === ValueTypeEnum.LIST_OBJECT
+      ) {
         const opts = new SelectorOptions(value)
-        const cheerioElement = context
-          ? this.$root(opts.selector, context)
-          : this.$root(opts.selector)
+        const cheerioRoot =
+          context && opts.selector
+            ? this.$root(opts.selector, context)
+            : context || this.$root(opts.selector)
         const result =
           type === ValueTypeEnum.SIMPLE
-            ? this.processSingleItem(cheerioElement, opts)
-            : this.processListItem(cheerioElement, opts)
+            ? this.processSingleItem(cheerioRoot, opts)
+            : this.processListItem(cheerioRoot, opts)
         mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
       }
     }
@@ -84,9 +89,13 @@ export default class {
       const isSimple =
         SelectorOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
       const isList = opts.selector && opts.listModel
+      const isObjectList =
+        isList && this.getValueType(opts.listModel || {}) !== ValueTypeEnum.SIMPLE
 
       return isSimple
         ? ValueTypeEnum.SIMPLE
+        : isObjectList
+        ? ValueTypeEnum.LIST_OBJECT
         : isList
         ? ValueTypeEnum.LIST
         : ValueTypeEnum.NESTED
@@ -110,28 +119,26 @@ export default class {
 
   private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
     if (!opts.listModel) return []
-    const listOpts = new SelectorOptions(opts.listModel)
-    const type = this.getValueType(listOpts)
+    const type = this.getValueType(opts)
 
-    if (type === ValueTypeEnum.SIMPLE || type === ValueTypeEnum.LIST) {
+    if (type === ValueTypeEnum.LIST) {
+      const listOpts = new SelectorOptions(opts.listModel)
       const children = element.find(listOpts.selector)
       const values = []
-      for (const child of children.toArray()) {
-        const value = this.processSingleItem(this.$root(child), listOpts)
+      for (let i = 0; i < children.length; i++) {
+        const value = this.processSingleItem(children.eq(i), listOpts)
         values.push(value)
       }
       return values
-    }
-
-    if (type === ValueTypeEnum.NESTED) {
+    } else if (type === ValueTypeEnum.LIST_OBJECT) {
       const values = []
-      for (const child of element.toArray()) {
-        const value = this.generate(opts.listModel, child)
+      for (let i = 0; i < element.length; i++) {
+        const value = this.generate(opts.listModel, element.eq(i))
         values.push(value)
       }
       return values
     }
 
-    return null
+    return []
   }
 }
