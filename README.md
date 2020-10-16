@@ -1,8 +1,12 @@
-![Scrape Them All](https://i.imgur.com/rhrbozr.png)
+<p align="center">
+  <img src="https://i.imgur.com/rhrbozr.png" alt="Scrape Them All">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/github/license/tanukijs/scrape-them-all" alt="License">
+  <img src="https://github.com/tanukijs/scrape-them-all/workflows/Build%20&%20tests/badge.svg" alt="Build & tests">
+</p>
 
-![License](https://img.shields.io/github/license/tanukijs/scrape-them-all) ![Build & tests](https://github.com/tanukijs/scrape-them-all/workflows/Build%20&%20tests/badge.svg)
-
-**[Scrape-Them-All]()** is a [Cheerio](https://cheerio.js.org) layer which improves your scraping experience.
+**[Scrape-Them-All](http://npmjs.com/package/scrape-them-all)** is a [Cheerio](https://cheerio.js.org) layer which improves your scraping experience.
 
 **This package is recent, if you have any suggestions or you notice that something is not working, feel free to open an issue or a pull-request, we will be happy to answer them as soon as possible**
 
@@ -23,26 +27,26 @@ yarn add fetch-cookie #optional
 
 `fetch-cookie` is only required if you plan to use the `cookieJar` option on requests.
 
-**⚠ If you get a ``too many redirects`` error when you scrape, we recommend to install ``fetch-cookie`` and use the option ``cookieJar: true`` in your request.**
+**⚠ If you get a ``too many redirects`` error when you scrape, we recommend to install ``fetch-cookie`` and use the option ``cookieJar: true`` in your request. You can also pass an instance of `tough.CookieJar` to this parameter.**
 
-Exemple:
+Example:
 ```js
-scrapeTA({url: 'https://google.com', cookieJar: true})
+scrapeTA({ url: 'https://google.com', cookieJar: true }, ...)
 ```
 ---
 
 # 📚 Documentation
 
-### ``scrapeTA(query, schema)``
+### `scrapeTA(query, schema)`
 
 Params:
 
-- **String|Object** ``url``: The page url or the page url & request options
-- **Object** ``schema``: the list of elements to scrape and the corresponding HTML tags
+- **query** `String` or `Object`: The page url or the page url and node-fetch options.
+- **schema** `Object`: the list of elements to scrape and the corresponding HTML tags.
 
 Returns:
 
-- **Object** ``Promise<data>``: A promise object resolving with data in JSON format
+- `Promise<Object>`: A promise containing the result as JSON.
 
 ## Schema options
 
@@ -116,11 +120,11 @@ ScrapeTA('url_or_https_options', {
 
 ---
 
-#  💪 HOW TO CONTRIBUTE
+# 💪 Contributions
  TODO
 
 ---
 
-# 📜 LICENSE
+# 📜 License
 
-MIT © [Tanuki](https://github.com/tanukijs), [Aperrix](https://github.com/Aperrix)
+[MIT](https://github.com/tanukijs/scrape-them-all/blob/typescript/LICENSE) © [Tanuki](https://github.com/tanukijs), [Aperrix](https://github.com/Aperrix).
