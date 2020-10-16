@@ -1,5 +1,5 @@
 import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
-import DataModeler, { IScheme } from './DataModeler'
+import { DataModeler, IScheme } from './DataModeler'
 
 interface CustomParams {
   url: RequestInfo

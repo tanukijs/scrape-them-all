@@ -1,6 +1,6 @@
 import cheerio from 'cheerio'
 
-class SelectorOptions {
+export class SelectorOptions {
   readonly selector: string = ''
   readonly isTrimmed: boolean = true
   readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
@@ -31,14 +31,14 @@ export interface IScheme {
   [key: string]: string | Partial<SelectorOptions> | IScheme
 }
 
-export enum EValueType {
+enum EValueType {
   SIMPLE,
   LIST,
   LIST_OBJECT,
   NESTED
 }
 
-export default class {
+export class DataModeler {
   private $root: cheerio.Root
 
   constructor(body: string) {
