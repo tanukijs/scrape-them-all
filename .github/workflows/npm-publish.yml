@@ -13,10 +13,10 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 12.x
-        registry-url: 'https://registry.npmjs.org'
+        registry-url: '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'
     - run: yarn install
     - run: yarn build
     - run: npm publish --access=public
       env: # More info about the environment variables in the README
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # You need to set this in your repo settings
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # You need to set this in your repo settings
