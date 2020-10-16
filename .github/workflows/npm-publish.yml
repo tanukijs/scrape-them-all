@@ -1,29 +1,22 @@
 name: Publish on NPM
 on:
-  push:
-    branches:
-      - master # Change this to your default branch
+  release:
+    types: [created]
 jobs:
   npm-publish:
     name: npm-publish
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [10.x, 12.x, 14.x]
     steps:
     - name: Checkout repository
       uses: actions/checkout@master
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Use Node.js 12.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
-    - name: Publish if version has been updated
-      uses: pascalgn/npm-publish-action@06e0830ea83eea10ed4a62654eeaedafb8bf50fc
-      with: # All of theses inputs are optional
-        tag_name: "v%s"
-        tag_message: "v%s"
-        commit_pattern: "^Release (\\S+)"
-        workspace: "."
+        node-version: 12.x
+        registry-url: 'https://registry.npmjs.org'
+    - run: yarn install
+    - run: yarn build
+    - run: npm publish --access=public
       env: # More info about the environment variables in the README
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Leave this as is, it's automatically generated
-        NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # You need to set this in your repo settings
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # You need to set this in your repo settings
