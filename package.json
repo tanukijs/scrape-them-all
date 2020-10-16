@@ -44,8 +44,5 @@
     "tslib": "^2.0.3",
     "typescript": "^4.0.3"
   },
-  "repository": "https://github.com/tanukijs/scrape-them-all.git",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/tanukijs"
-  }
+  "repository": "https://github.com/tanukijs/scrape-them-all.git"
 }
