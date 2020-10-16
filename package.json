@@ -1,7 +1,7 @@
 {
   "name": "scrape-them-all",
   "description": "🚀 An easy-to-handle Node.js scraper that allow you to scrape them all in a record time.",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "author": "Tanuki <sapuraizu.off@gmail.com> (https://github.com/tanukijs)",
   "contributors": [
