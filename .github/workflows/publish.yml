@@ -6,14 +6,14 @@ on:
 
 jobs:
   build:
-    run-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
-        os: ubuntu-latest
-        npm: https://registry.npmjs.org
-        gpr: https://npm.pkg.github.com
+        os: 'ubuntu-latest'
+        npm: 'https://registry.npmjs.org'
+        gpr: 'https://npm.pkg.github.com'
 
     steps:
       - name: Checkout repository
