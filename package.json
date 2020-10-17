@@ -12,8 +12,8 @@
   "main": "dist/index.js",
   "scripts": {
     "postinstall": "yarn run build",
-    "lint": "yarn run build && eslint --ext .ts --ignore-path .gitignore .",
-    "lintfix": "yarn run build && eslint --fix --ext .ts --ignore-path .gitignore .",
+    "lint": "eslint --ext .ts --ignore-path .gitignore .",
+    "lintfix": "eslint --fix --ext .ts --ignore-path .gitignore .",
     "build": "rimraf dist && tsc -p tsconfig.json",
     "test": "jest"
   },
