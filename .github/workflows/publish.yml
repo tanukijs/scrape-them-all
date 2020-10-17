@@ -37,9 +37,9 @@ jobs:
           
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
-          with:
-            node-version: ${{ matrix.node-version }}
-            registry-url: ${{ matrix.gpr }}
+        with:
+          node-version: ${{ matrix.node-version }}
+          registry-url: ${{ matrix.gpr }}
 
       - name: Publish to Github packages registry
         run: yarn publish
