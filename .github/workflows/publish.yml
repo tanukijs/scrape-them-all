@@ -58,7 +58,7 @@ jobs:
         run: yarn publish
 
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.YARN_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -70,6 +70,6 @@ jobs:
         run: yarn publish
 
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GPR_TOKEN }}
 
     needs: build
