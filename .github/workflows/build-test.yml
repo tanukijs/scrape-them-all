@@ -24,14 +24,16 @@ jobs:
           fetch-depth: 0 # All history
       
       - name: Get yarn cache directory path
-          id: yarn-cache-dir-path
-          run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-          uses: actions/cache@v2
-          id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
-          with:
-            path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-            key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-            restore-keys: |
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
+      
+      - name: Cache yarn directory
+        uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
               ${{ runner.os }}-yarn-
 
       - name: Install dependencies
@@ -44,14 +46,15 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version: [10.x, 12.x, 14.x]
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
+        
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
       - name: Build to ./dist
         run: yarn run build
@@ -65,14 +68,15 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version: [10.x, 12.x, 14.x]
-
-    - name: Setup Node.js
-      uses: actions/setup-node@v1
+        
+    steps: 
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
 
       - name: Run unit tests
