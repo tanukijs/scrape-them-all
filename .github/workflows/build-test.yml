@@ -1,85 +1,30 @@
-name: Run build & tests
+name: Build & test
 
 on: [push, pull_request]
 
 jobs:
-
   setup:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest]
         node-version: [10.x, 12.x, 14.x]
+        os: ubuntu-latest
 
     steps:
-      - name: Setup Node.js
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-
       - name: Checkout repository
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          fetch-depth: 0 # All history
-      
-      - name: Get yarn cache directory path
-        id: yarn-cache-dir-path
-      - run: echo "::set-output name=dir::$(yarn config get cacheFolder)"
-      
-      - name: Cache yarn directory
-      - uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-              ${{ runner.os }}-yarn-
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-      - run: yarn --check-files --frozen-lockfile --non-interactive
+        run: yarn --check-files --frozen-lockfile --non-interactive
 
-  build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [10.x, 12.x, 14.x]
-        
-    steps:
-      - name: Setup Node.js
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: Checkout repository
-      - uses: actions/checkout@v2
-
-      - name: Build to ./dist
-      - run: yarn run build
-    
-    needs: setup
-
-  test:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        node-version: [10.x, 12.x, 14.x]
-        
-    steps: 
-      - name: Setup Node.js
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node }}
-
-      - name: Checkout repository
-      - uses: actions/checkout@v2
-
+      - name: Build project
+        run: yarn run build
 
       - name: Run unit tests
-      - run: yarn test
-    
-    needs: [setup, build]
+        run: yarn test
