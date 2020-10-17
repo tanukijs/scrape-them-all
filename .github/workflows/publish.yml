@@ -1,4 +1,4 @@
-name: Publish package to NPM & GPR
+name: Publish to NPM & GPR
 
 on:
   release:
@@ -11,7 +11,33 @@ jobs:
     strategy:
       matrix:
         node-version: [10.x, 12.x, 14.x]
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: yarn --check-files --frozen-lockfile --non-interactive
+
+      - name: Build project
+        run: yarn run build
+
+      - name: Run unit tests
+        run: yarn test
+
+  publish:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x]
+        os: [ubuntu-latest]
         npm: 'https://registry.npmjs.org'
         gpr: 'https://npm.pkg.github.com'
 
@@ -34,7 +60,6 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.YARN_TOKEN }}
 
-          
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -43,6 +68,8 @@ jobs:
 
       - name: Publish to Github packages registry
         run: yarn publish
-        
+
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    needs: build

@@ -3,7 +3,7 @@ name: Build & test
 on: [push, pull_request]
 
 jobs:
-  setup:
+  build:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -22,6 +22,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn --check-files --frozen-lockfile --non-interactive
+      
+      - name: Lint code
+        run: yarn lint
 
       - name: Build project
         run: yarn run build
