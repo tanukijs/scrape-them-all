@@ -15,6 +15,6 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Generate changelog
-        uses: saadmk11/changelog-ci@v0.7.0
+        uses: saadmk11/changelog-ci@master
         with:
           config_file: changelog-ci-config.json
