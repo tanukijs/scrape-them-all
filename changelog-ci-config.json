@@ -1,6 +1,5 @@
 {
   "header_prefix": "Release:",
-  "commit_changelog": true,
   "group_config": [
     {
       "title": ":bug: Bug Fixes",

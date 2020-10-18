@@ -9,12 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        node-version: [12.x]
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
