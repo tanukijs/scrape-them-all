@@ -36,7 +36,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: 12
+        node-version: '12.x'
         os: [ubuntu-latest]
         npm: 'https://registry.npmjs.org'
         gpr: 'https://npm.pkg.github.com'
