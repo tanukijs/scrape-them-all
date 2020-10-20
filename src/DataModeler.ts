@@ -46,7 +46,7 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Generate data from HTML & user-designed JSON schema
    *
    * @param {IScheme} dataModel
    * @param {cheerio.Cheerio} [context]
@@ -87,7 +87,7 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Get type of an input
    *
    * @private
    * @template K
@@ -112,7 +112,7 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process single item
    *
    * @private
    * @param {cheerio.Cheerio} element
@@ -135,7 +135,7 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process basic list
    *
    * @private
    * @param {cheerio.Cheerio} element
@@ -155,7 +155,7 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process list of objects
    *
    * @private
    * @param {cheerio.Cheerio} element
