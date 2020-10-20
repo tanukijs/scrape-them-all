@@ -1,24 +1,29 @@
-import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
+import nodeFetch, { RequestInfo, RequestInit, Response } from 'node-fetch'
+import { CookieJar } from 'fetch-cookie'
 import { DataModeler, IScheme } from './DataModeler'
 
-interface CustomParams {
+interface IExtraParams {
   url: RequestInfo
-  cookieJar?: boolean | unknown
+  cookieJar?: boolean | CookieJar
 }
 
-type TQueryInfo = RequestInfo | (RequestInit & CustomParams)
+type TRequest = RequestInfo | (RequestInit & IExtraParams)
+
+interface IResult {
+  response: Response
+  data: Record<string, unknown>
+}
 
 /**
- * FUNCTION DESC
+ * Create an instance of node-fetch with managed cookies
  *
- * @param {CustomParams} query
+ * @param {IExtraParams} query
  * @returns {typeof nodeFetch}
  */
-function withCookies(query: CustomParams): typeof nodeFetch {
+async function withCookies(query: IExtraParams): Promise<typeof nodeFetch> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fetchCookie = require('fetch-cookie/node-fetch')
-    const cookieJar = typeof query.cookieJar === 'boolean' ? null : query.cookieJar
+    const { default: fetchCookie } = await import('fetch-cookie/node-fetch')
+    const cookieJar = typeof query.cookieJar === 'boolean' ? undefined : query.cookieJar
     return fetchCookie(nodeFetch, cookieJar) as typeof nodeFetch
   } catch (e) {
     throw new Error('Please run `npm install fetch-cookie` to use the cookieJar option.')
@@ -26,26 +31,24 @@ function withCookies(query: CustomParams): typeof nodeFetch {
 }
 
 /**
- * FUNCTION DESC
+ * Get HTML body and transform it as user-designed object
  *
- * @export
- * @param {QueryInfo} query
- * @param {IScheme} schema
- * @returns {Promise<Record<string, unknown>>}
+ * @param {TRequest} query
+ * @param {IScheme} scheme
+ *
+ * @returns {Promise<IResult>}
  */
-export async function ScrapeTA(
-  query: TQueryInfo,
-  schema: IScheme
-): Promise<Record<string, unknown>> {
+export async function ScrapeTA(request: TRequest, scheme: IScheme): Promise<IResult> {
   const fetch =
-    typeof query === 'object' && 'cookieJar' in query && query.cookieJar
-      ? withCookies(query)
+    typeof request === 'object' && 'cookieJar' in request && request.cookieJar
+      ? await withCookies(request)
       : nodeFetch
-  const requestInfo = ((typeof query === 'object' && 'url' in query && query.url) ||
-    query) as RequestInfo
-  const requestInit = typeof query === 'object' ? (query as RequestInit) : undefined
-  const req = await fetch(requestInfo, requestInit)
-  const res = await req.text()
-  const dataModeler = new DataModeler(res)
-  return dataModeler.generate(schema)
+  const requestInfo = ((typeof request === 'object' && 'url' in request && request.url) ||
+    request) as RequestInfo
+  const requestInit = typeof request === 'object' ? (request as RequestInit) : undefined
+  const response = await fetch(requestInfo, requestInit)
+  const responseHTML = await response.text()
+  const dataModeler = new DataModeler(responseHTML)
+  const data = await dataModeler.generate(scheme)
+  return { response, data }
 }

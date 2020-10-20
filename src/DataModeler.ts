@@ -46,10 +46,11 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Generate data from HTML body & user-designed JSON scheme
    *
    * @param {IScheme} dataModel
    * @param {cheerio.Cheerio} [context]
+   *
    * @returns {Promise<Record<string, unknown>>}
    */
   async generate(
@@ -87,11 +88,10 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Get type of an input
    *
-   * @private
-   * @template K
    * @param {IScheme[K]} scheme
+   *
    * @returns {(EValueType | void)}
    */
   private getValueType<K extends keyof IScheme>(scheme: IScheme[K]): EValueType | void {
@@ -112,11 +112,11 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process single item
    *
-   * @private
    * @param {cheerio.Cheerio} element
    * @param {SelectorOptions} opts
+   *
    * @returns {unknown}
    */
   private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
@@ -135,11 +135,11 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process basic list
    *
-   * @private
    * @param {cheerio.Cheerio} element
    * @param {SelectorOptions} opts
+   *
    * @returns {unknown[]}
    */
   private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown[] {
@@ -155,11 +155,11 @@ export class DataModeler {
   }
 
   /**
-   * FUNCTION DESC
+   * Process list of objects
    *
-   * @private
    * @param {cheerio.Cheerio} element
    * @param {SelectorOptions} opts
+   *
    * @returns {Promise<Record<string, unknown>>[]}
    */
   private processListObjectItem(
