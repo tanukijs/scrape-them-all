@@ -21,8 +21,47 @@ describe('Scrape-them-all', () => {
     done()
   })
 
+  test('scrape by simply storing redirects in cookies', async () => {
+    const response = await ScrapeTA(
+      { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
+      {
+        month: {
+          selector: '#almanax_day .day-text'
+        }
+      }
+    )
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
+      month: 'Javian'
+    })
+  })
+
+  test('scrape with custom headers to get data modified by AJAX', async () => {
+    const response = await ScrapeTA(
+      {
+        url:
+          'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',
+        headers: {
+          'x-requested-with': 'XMLHttpRequest',
+          'x-pjax': 'true',
+          'x-pjax-container': '.ak-item-details-container'
+        }
+      },
+      {
+        effect: {
+          selector: '.ak-container.ak-content-list.ak-displaymode-col .ak-title',
+          accessor: (x) => x.eq(0).text()
+        }
+      }
+    )
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
+      effect: '120 Chance'
+    })
+  })
+
   test('scrape simple data', async () => {
-    const data = await ScrapeTA(`http://localhost:${port}`, {
+    const response = await ScrapeTA(`http://localhost:${port}`, {
       title: 'h1.title',
       description: '.description',
       date: {
@@ -30,27 +69,29 @@ describe('Scrape-them-all', () => {
         transformer: (x) => new Date(x)
       }
     })
-    expect(data).toEqual({
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
       title: 'Title',
       description: 'Lorem ipsum',
       date: new Date('1988-01-01')
     })
   })
 
-  test('scrape lists', async () => {
-    const data = await ScrapeTA(`http://localhost:${port}`, {
+  test('scrape list', async () => {
+    const response = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: 'li'
       }
     })
-    expect(data).toEqual({
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
       features: ['1', '2', '3', '4', '5', '6']
     })
   })
 
-  test('scrape and transform lists', async () => {
-    const data = await ScrapeTA(`http://localhost:${port}`, {
+  test('scrape and transform list', async () => {
+    const response = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: {
@@ -59,13 +100,14 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(data).toEqual({
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
       features: [1, 2, 3, 4, 5, 6]
     })
   })
 
   test('scrape nested objects', async () => {
-    const data = await ScrapeTA(`http://localhost:${port}`, {
+    const response = await ScrapeTA(`http://localhost:${port}`, {
       nested: {
         foo: {
           level1: {
@@ -79,7 +121,8 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(data).toEqual({
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
       nested: {
         foo: {
           level1: {
@@ -93,7 +136,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape closest sample', async () => {
-    const data = await ScrapeTA(`http://localhost:${port}`, {
+    const response = await ScrapeTA(`http://localhost:${port}`, {
       addresses: {
         selector: 'table tbody tr',
         listModel: {
@@ -105,7 +148,8 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(data).toEqual({
+    expect(response.resInfo.ok).toBe(true)
+    expect(response.data).toEqual({
       addresses: [
         { address: 'one way street', city: 'Sydney' },
         { address: 'GT Road', city: 'Sydney' }
