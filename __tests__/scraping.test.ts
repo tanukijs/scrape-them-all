@@ -17,12 +17,11 @@ describe('Scrape-them-all', () => {
   })
 
   afterAll((done) => {
-    server.close()
-    done()
+    server.close(() => done())
   })
 
   test('scrape by simply storing redirects in cookies', async () => {
-    const response = await ScrapeTA(
+    const { response, data } = await ScrapeTA(
       { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
       {
         month: {
@@ -30,14 +29,14 @@ describe('Scrape-them-all', () => {
         }
       }
     )
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       month: 'Javian'
     })
   })
 
   test('scrape with custom headers to get data modified by AJAX', async () => {
-    const response = await ScrapeTA(
+    const { response, data } = await ScrapeTA(
       {
         url:
           'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',
@@ -54,14 +53,14 @@ describe('Scrape-them-all', () => {
         }
       }
     )
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       effect: '120 Chance'
     })
   })
 
   test('scrape simple data', async () => {
-    const response = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       title: 'h1.title',
       description: '.description',
       date: {
@@ -69,8 +68,8 @@ describe('Scrape-them-all', () => {
         transformer: (x) => new Date(x)
       }
     })
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       title: 'Title',
       description: 'Lorem ipsum',
       date: new Date('1988-01-01')
@@ -78,20 +77,20 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape list', async () => {
-    const response = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: 'li'
       }
     })
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       features: ['1', '2', '3', '4', '5', '6']
     })
   })
 
   test('scrape and transform list', async () => {
-    const response = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: {
@@ -100,14 +99,14 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       features: [1, 2, 3, 4, 5, 6]
     })
   })
 
   test('scrape nested objects', async () => {
-    const response = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       nested: {
         foo: {
           level1: {
@@ -121,8 +120,8 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       nested: {
         foo: {
           level1: {
@@ -136,7 +135,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape closest sample', async () => {
-    const response = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       addresses: {
         selector: 'table tbody tr',
         listModel: {
@@ -148,8 +147,8 @@ describe('Scrape-them-all', () => {
         }
       }
     })
-    expect(response.resInfo.ok).toBe(true)
-    expect(response.data).toEqual({
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
       addresses: [
         { address: 'one way street', city: 'Sydney' },
         { address: 'GT Road', city: 'Sydney' }
