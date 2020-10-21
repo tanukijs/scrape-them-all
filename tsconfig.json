@@ -9,8 +9,8 @@
     "declaration": true,
     "declarationMap": false,
     "sourceMap": false,
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "dist",
+    "rootDir": "src",
     "removeComments": true,
     "importHelpers": true,
     "downlevelIteration": true,
@@ -35,7 +35,7 @@
     /* Module Resolution Options */
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "paths": {
         "@/*": ["*"],
     },
@@ -44,6 +44,6 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["./src"],
-  "exclude": ["./node_modules", "./dist"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

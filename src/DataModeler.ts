@@ -1,4 +1,5 @@
 import cheerio from 'cheerio'
+import { IScheme } from '.'
 
 export class SelectorOptions {
   readonly selector: string = ''
@@ -25,10 +26,6 @@ export class SelectorOptions {
   static get keys(): string[] {
     return ['selector', 'isTrimmed', 'accessor', 'attribute', 'transformer', 'listModel']
   }
-}
-
-export interface IScheme {
-  [key: string]: string | Partial<SelectorOptions> | IScheme
 }
 
 enum EValueType {

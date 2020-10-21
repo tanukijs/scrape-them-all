@@ -1,4 +1,4 @@
-import { ScrapeTA } from '../src'
+import ScrapeTA from '../src'
 import { createServer, Server } from 'http'
 import { readFileSync } from 'fs'
 import { join } from 'path'
