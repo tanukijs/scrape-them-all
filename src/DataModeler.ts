@@ -1,5 +1,5 @@
 import cheerio from 'cheerio'
-import { IScheme } from '.'
+import { ScrapeTAScheme } from '.'
 
 export class SelectorOptions {
   readonly selector: string = ''
@@ -8,7 +8,7 @@ export class SelectorOptions {
   readonly attribute?: string
   readonly transformer?: (value: string) => unknown
   // eslint-disable-next-line no-use-before-define
-  readonly listModel?: string | IScheme
+  readonly listModel?: string | ScrapeTAScheme
 
   constructor(opts: string | Partial<SelectorOptions> = '') {
     if (typeof opts === 'string') {
@@ -45,13 +45,13 @@ export class DataModeler {
   /**
    * Generate data from HTML body & user-designed JSON scheme
    *
-   * @param {IScheme} dataModel
+   * @param {ScrapeTAScheme} dataModel
    * @param {cheerio.Cheerio} [context]
    *
    * @returns {Promise<Record<string, unknown>>}
    */
   async generate(
-    dataModel: IScheme,
+    dataModel: ScrapeTAScheme,
     context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
     const mappedResult = {}
@@ -61,7 +61,7 @@ export class DataModeler {
       const type = this.getValueType(value)
 
       if (type === EValueType.NESTED) {
-        mappedResult[key] = await this.generate(value as IScheme, context)
+        mappedResult[key] = await this.generate(value as ScrapeTAScheme, context)
         continue
       }
 
@@ -87,11 +87,13 @@ export class DataModeler {
   /**
    * Get type of an input
    *
-   * @param {IScheme[K]} scheme
+   * @param {ScrapeTAScheme[K]} scheme
    *
    * @returns {(EValueType | void)}
    */
-  private getValueType<K extends keyof IScheme>(scheme: IScheme[K]): EValueType | void {
+  private getValueType<K extends keyof ScrapeTAScheme>(
+    scheme: ScrapeTAScheme[K]
+  ): EValueType | void {
     if (typeof scheme === 'string') return EValueType.SIMPLE
     else if (typeof scheme === 'object') {
       const opts = scheme as SelectorOptions
@@ -165,7 +167,7 @@ export class DataModeler {
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
-      const value = this.generate(opts.listModel as IScheme, element.eq(i))
+      const value = this.generate(opts.listModel as ScrapeTAScheme, element.eq(i))
       values.push(value)
     }
     return values

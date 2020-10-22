@@ -8,6 +8,12 @@
     "Aperrix <aperrix@gmail.com> (https://github.com/Aperrix)"
   ],
   "repository": "https://github.com/tanukijs/scrape-them-all.git",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10"
+  },
   "keywords": [
     "scraper",
     "node-scraper",
@@ -19,15 +25,12 @@
     "crawler",
     "crawling"
   ],
-  "source": "src/index.ts",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
     "lintfix": "eslint --fix --ext .ts --ignore-path .gitignore .",
     "build": "rimraf dist && tsc -p tsconfig.json",
     "test": "jest",
-    "prepare": "tsc -p tsconfig.json"
+    "prepare": "npm run build && npm run test"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
