@@ -12,9 +12,9 @@ export type ScrapeTARequest = RequestInfo | (RequestWithCookies & RequestInit)
 type SchemeOptions = {
   selector?: string
   isTrimmed?: boolean
-  accessor?: string | ((node: cheerio.Cheerio) => unknown)
+  access?: string | ((node: cheerio.Cheerio) => unknown)
   attribute?: string
-  transformer?: (value: string) => unknown
+  transform?: (value: string) => unknown
   // eslint-disable-next-line no-use-before-define
   listModel?: string | ScrapeTAScheme
 }

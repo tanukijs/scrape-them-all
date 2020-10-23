@@ -4,9 +4,9 @@ import { ScrapeTAScheme } from '.'
 export class SelectorOptions {
   readonly selector: string = ''
   readonly isTrimmed: boolean = true
-  readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
+  readonly access: string | ((node: cheerio.Cheerio) => unknown) = 'text'
   readonly attribute?: string
-  readonly transformer?: (value: string) => unknown
+  readonly transform?: (value: string) => unknown
   // eslint-disable-next-line no-use-before-define
   readonly listModel?: string | ScrapeTAScheme
 
@@ -16,15 +16,15 @@ export class SelectorOptions {
     } else {
       this.selector = opts.selector || ''
       this.isTrimmed = opts.isTrimmed || true
-      this.accessor = opts.accessor || 'text'
+      this.access = opts.access || 'text'
       this.attribute = opts.attribute
-      this.transformer = opts.transformer
+      this.transform = opts.transform
       this.listModel = opts.listModel
     }
   }
 
   static get keys(): string[] {
-    return ['selector', 'isTrimmed', 'accessor', 'attribute', 'transformer', 'listModel']
+    return ['selector', 'isTrimmed', 'access', 'attribute', 'transform', 'listModel']
   }
 }
 
@@ -120,15 +120,15 @@ export class DataModeler {
    */
   private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
     let value =
-      typeof opts.accessor === 'function'
-        ? opts.accessor(element)
-        : typeof opts.accessor === 'string' && typeof element[opts.accessor] !== undefined
-        ? element[opts.accessor]()
+      typeof opts.access === 'function'
+        ? opts.access(element)
+        : typeof opts.access === 'string' && typeof element[opts.access] !== undefined
+        ? element[opts.access]()
         : null
 
     if (opts.attribute) value = element.attr(opts.attribute as string)
     if (opts.isTrimmed && value && typeof value === 'string') value = value.trim()
-    if (typeof opts.transformer === 'function') value = opts.transformer(value)
+    if (typeof opts.transform === 'function') value = opts.transform(value)
 
     return value
   }
