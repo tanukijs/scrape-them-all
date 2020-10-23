@@ -14,7 +14,12 @@ export type ScrapeTAResult = {
   data: Record<string, unknown>
 }
 
-type TSchemeInterpreter = Partial<SchemeInterpreter>
+type TSchemeInterpreter = Partial<
+  Pick<
+    SchemeInterpreter,
+    'selector' | 'accessor' | 'attribute' | 'isTrimmed' | 'listModel' | 'transformer'
+  >
+>
 export type ScrapeTAScheme = {
   [key: string]: string | TSchemeInterpreter | ScrapeTAScheme
 }
