@@ -49,7 +49,7 @@ describe('Scrape-them-all', () => {
       {
         effect: {
           selector: '.ak-container.ak-content-list.ak-displaymode-col .ak-title',
-          accessor: (x) => x.eq(0).text()
+          access: (x) => x.eq(0).text()
         }
       }
     )
@@ -59,13 +59,24 @@ describe('Scrape-them-all', () => {
     })
   })
 
+<<<<<<< HEAD
   test('scrape simple data', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       title: 'h1.title',
       description: '.description',
+=======
+  test('scrape basic data', async () => {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+      title: {
+        selector: 'h1.title'
+      },
+      description: {
+        selector: '.description'
+      },
+>>>>>>> 85113f960e78139803181a663a18acaa26f59f9f
       date: {
         selector: '.date',
-        transformer: (x) => new Date(x)
+        transform: (x) => new Date(x)
       }
     })
     expect(response.ok).toBe(true)
@@ -80,7 +91,9 @@ describe('Scrape-them-all', () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
-        listModel: 'li'
+        listModel: {
+          selector: 'li'
+        }
       }
     })
     expect(response.ok).toBe(true)
@@ -95,7 +108,7 @@ describe('Scrape-them-all', () => {
         selector: '.features',
         listModel: {
           selector: 'li',
-          transformer: (x) => parseInt(x, 10)
+          transform: (x) => parseInt(x, 10)
         }
       }
     })
@@ -105,18 +118,29 @@ describe('Scrape-them-all', () => {
     })
   })
 
+<<<<<<< HEAD
   test('scrape nested objects', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
+=======
+  test('scrape nested object', async () => {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+>>>>>>> 85113f960e78139803181a663a18acaa26f59f9f
       nested: {
+        selector: '.nested',
         foo: {
           level1: {
+            selector: '.level1',
             level2: {
-              selector: '.nested .level1 span',
-              accessor: (x) => x.eq(1).text()
+              selector: 'span',
+              access: (x) => x.eq(1).text()
             }
           },
-          level1Text: '.nested span',
-          level2Text: '.nested .level2'
+          level1Text: {
+            selector: 'span'
+          },
+          level2Text: {
+            selector: '.level2'
+          }
         }
       }
     })
@@ -127,22 +151,27 @@ describe('Scrape-them-all', () => {
           level1: {
             level2: '2'
           },
-          level2Text: '2',
-          level1Text: 'Foo12'
+          level1Text: 'Foo12',
+          level2Text: '2'
         }
       }
     })
   })
 
+<<<<<<< HEAD
   test('scrape closest sample', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
+=======
+  test('scrape closest', async () => {
+    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+>>>>>>> 85113f960e78139803181a663a18acaa26f59f9f
       addresses: {
         selector: 'table tbody tr',
         listModel: {
           address: '.address',
           city: {
             selector: '',
-            accessor: (x) => x.closest('table').find('thead .city').text()
+            access: (x) => x.closest('table').find('thead .city').text()
           }
         }
       }
