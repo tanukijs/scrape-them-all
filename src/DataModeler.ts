@@ -1,13 +1,6 @@
 import cheerio from 'cheerio'
 import { ScrapeTAScheme } from './typings'
-import { SchemeOptions } from './SchemeOptions'
-
-enum EValueType {
-  SIMPLE,
-  LIST,
-  LIST_OBJECT,
-  NESTED
-}
+import { SchemeOptions, EOptionType } from './SchemeOptions'
 
 export class DataModeler {
   private $root: cheerio.Root
@@ -32,56 +25,29 @@ export class DataModeler {
 
     for (const key in dataModel) {
       const value = dataModel[key]
-      const type = this.getValueType(value)
+      const opts = new SchemeOptions(value)
 
-      if (type === EValueType.NESTED) {
+      if (opts.type === EOptionType.OBJECT) {
         mappedResult[key] = await this.generate(value as ScrapeTAScheme, context)
         continue
       }
 
-      const opts = new SchemeOptions(value)
       const cheerioRoot =
         context && opts.selector
           ? this.$root(opts.selector, context)
           : context || this.$root(opts.selector)
       const result =
-        type === EValueType.SIMPLE
+        opts.type === EOptionType.VALUE
           ? this.processSingleItem(cheerioRoot, opts)
-          : type === EValueType.LIST
+          : opts.type === EOptionType.ARRAY
           ? this.processListItem(cheerioRoot, opts)
-          : type === EValueType.LIST_OBJECT
+          : opts.type === EOptionType.OBJECT_ARRAY
           ? this.processListObjectItem(cheerioRoot, opts)
           : undefined
       mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
     }
 
     return mappedResult
-  }
-
-  /**
-   * Get type of an input
-   *
-   * @param {ScrapeTAScheme[K]} scheme
-   *
-   * @returns {(EValueType | void)}
-   */
-  private getValueType<K extends keyof ScrapeTAScheme>(
-    scheme: ScrapeTAScheme[K]
-  ): EValueType | void {
-    if (typeof scheme === 'string') return EValueType.SIMPLE
-    else if (typeof scheme === 'object') {
-      const opts = scheme as SchemeOptions
-      const isSimple =
-        SchemeOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
-      if (isSimple) return EValueType.SIMPLE
-
-      const isList = opts.selector && opts.listModel
-      const isObjectList =
-        isList && this.getValueType(opts.listModel || {}) !== EValueType.SIMPLE
-      if (isObjectList) return EValueType.LIST_OBJECT
-      if (isList) return EValueType.LIST
-      return EValueType.NESTED
-    }
   }
 
   /**
