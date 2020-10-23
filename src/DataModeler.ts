@@ -25,16 +25,16 @@ export class DataModeler {
 
     for (const key in opts.children) {
       const value = new SchemeInterpreter(opts.children[key])
-
-      if (value.type === EOptionType.OBJECT) {
-        mappedResult[key] = await this.generate(value, context)
-        continue
-      }
-
       const cheerioRoot =
         context && value.selector
           ? this.$root(value.selector, context)
           : context || this.$root(value.selector)
+
+      if (value.type === EOptionType.OBJECT) {
+        mappedResult[key] = await this.generate(value, cheerioRoot)
+        continue
+      }
+
       const result =
         value.type === EOptionType.VALUE
           ? this.processValue(cheerioRoot, value)
