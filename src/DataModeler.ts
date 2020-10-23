@@ -20,7 +20,9 @@ export class DataModeler {
     opts: SchemeInterpreter,
     context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
-    if (opts.type !== EOptionType.OBJECT) return {}
+    if (opts.type !== EOptionType.OBJECT)
+      throw new Error('Schema passed to generate() must be a root object.')
+
     const mappedResult = {}
 
     for (const key in opts.children) {
