@@ -1,4 +1,5 @@
 import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
+import { SchemeInterpreter } from './SchemeInterpreter'
 import { DataModeler } from './DataModeler'
 import {
   ScrapeTAExtraParams,
@@ -46,6 +47,7 @@ export async function scrapeTA(
   const response = await fetch(requestInfo, requestInit)
   const responseHTML = await response.text()
   const dataModeler = new DataModeler(responseHTML)
-  const data = await dataModeler.generate(scheme)
+  const usableScheme = new SchemeInterpreter(scheme)
+  const data = await dataModeler.generate(usableScheme)
   return { response, data }
 }

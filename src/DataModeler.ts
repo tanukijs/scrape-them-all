@@ -1,6 +1,5 @@
 import cheerio from 'cheerio'
-import { ScrapeTAScheme } from './typings'
-import { SchemeOptions, EOptionType } from './SchemeOptions'
+import { EOptionType, SchemeInterpreter } from './SchemeInterpreter'
 
 export class DataModeler {
   private $root: cheerio.Root
@@ -12,39 +11,40 @@ export class DataModeler {
   /**
    * Generate data from HTML body & user-designed JSON scheme
    *
-   * @param {ScrapeTAScheme} dataModel
+   * @param {SchemeInterpreter} opts
    * @param {cheerio.Cheerio} [context]
    *
    * @returns {Promise<Record<string, unknown>>}
    */
   async generate(
-    dataModel: ScrapeTAScheme,
+    opts: SchemeInterpreter,
     context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
+    if (opts.type !== EOptionType.OBJECT) return {}
     const mappedResult = {}
 
-    for (const key in dataModel) {
-      const value = dataModel[key]
-      const opts = new SchemeOptions(value)
+    for (const key in opts.children) {
+      const value = new SchemeInterpreter(opts.children[key])
 
-      if (opts.type === EOptionType.OBJECT) {
-        mappedResult[key] = await this.generate(value as ScrapeTAScheme, context)
+      if (value.type === EOptionType.OBJECT) {
+        mappedResult[key] = await this.generate(value, context)
         continue
       }
 
       const cheerioRoot =
-        context && opts.selector
-          ? this.$root(opts.selector, context)
-          : context || this.$root(opts.selector)
+        context && value.selector
+          ? this.$root(value.selector, context)
+          : context || this.$root(value.selector)
       const result =
-        opts.type === EOptionType.VALUE
-          ? this.processSingleItem(cheerioRoot, opts)
-          : opts.type === EOptionType.ARRAY
-          ? this.processListItem(cheerioRoot, opts)
-          : opts.type === EOptionType.OBJECT_ARRAY
-          ? this.processListObjectItem(cheerioRoot, opts)
+        value.type === EOptionType.VALUE
+          ? this.processValue(cheerioRoot, value)
+          : value.type === EOptionType.ARRAY
+          ? this.processArray(cheerioRoot, value)
+          : value.type === EOptionType.OBJECT_ARRAY
+          ? this.processObjectArray(cheerioRoot, value)
           : undefined
       mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
+      continue
     }
 
     return mappedResult
@@ -54,11 +54,11 @@ export class DataModeler {
    * Process single item
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {unknown}
    */
-  private processSingleItem(element: cheerio.Cheerio, opts: SchemeOptions): unknown {
+  private processValue(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown {
     let value =
       typeof opts.accessor === 'function'
         ? opts.accessor(element)
@@ -77,17 +77,17 @@ export class DataModeler {
    * Process basic list
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {unknown[]}
    */
-  private processListItem(element: cheerio.Cheerio, opts: SchemeOptions): unknown[] {
+  private processArray(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown[] {
     if (!opts.listModel) return []
     const values = []
-    const listOpts = new SchemeOptions(opts.listModel)
+    const listOpts = opts.listModel as SchemeInterpreter
     const children = element.find(listOpts.selector)
     for (let i = 0; i < children.length; i++) {
-      const value = this.processSingleItem(children.eq(i), listOpts)
+      const value = this.processValue(children.eq(i), listOpts)
       values.push(value)
     }
     return values
@@ -97,17 +97,17 @@ export class DataModeler {
    * Process list of objects
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {Promise<Record<string, unknown>>[]}
    */
-  private processListObjectItem(
+  private processObjectArray(
     element: cheerio.Cheerio,
-    opts: SchemeOptions
+    opts: SchemeInterpreter
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
-      const value = this.generate(opts.listModel as ScrapeTAScheme, element.eq(i))
+      const value = this.generate(opts.listModel as SchemeInterpreter, element.eq(i))
       values.push(value)
     }
     return values

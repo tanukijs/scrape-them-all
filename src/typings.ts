@@ -1,6 +1,6 @@
 import { RequestInfo, RequestInit, Response } from 'node-fetch'
 import { CookieJar } from 'fetch-cookie'
-import { SchemeOptions } from './SchemeOptions'
+import { SchemeInterpreter } from './SchemeInterpreter'
 
 export type ScrapeTAExtraParams = {
   url: RequestInfo
@@ -14,7 +14,7 @@ export type ScrapeTAResult = {
   data: Record<string, unknown>
 }
 
-type TSchemeOptions = Partial<SchemeOptions>
+type TSchemeInterpreter = Partial<SchemeInterpreter>
 export type ScrapeTAScheme = {
-  [key: string]: string | TSchemeOptions | ScrapeTAScheme
+  [key: string]: string | TSchemeInterpreter | ScrapeTAScheme
 }
