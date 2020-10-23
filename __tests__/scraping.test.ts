@@ -114,7 +114,7 @@ describe('Scrape-them-all', () => {
   test('scrape nested object', async () => {
     const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
       nested: {
-        selector: 'nested',
+        selector: '.nested',
         foo: {
           level1: {
             selector: '.level1',
