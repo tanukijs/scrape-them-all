@@ -1,40 +1,20 @@
-import { CookieJar } from 'fetch-cookie'
-import nodeFetch, { RequestInfo, RequestInit, Response } from 'node-fetch'
+import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
 import { DataModeler } from './DataModeler'
-
-type RequestWithCookies = {
-  url: RequestInfo
-  cookieJar?: boolean | CookieJar
-}
-
-export type ScrapeTARequest = RequestInfo | (RequestWithCookies & RequestInit)
-
-type SchemeOptions = {
-  selector?: string
-  isTrimmed?: boolean
-  accessor?: string | ((node: cheerio.Cheerio) => unknown)
-  attribute?: string
-  transformer?: (value: string) => unknown
-  // eslint-disable-next-line no-use-before-define
-  listModel?: string | ScrapeTAScheme
-}
-
-export type ScrapeTAResult = {
-  response: Response
-  data: Record<string, unknown>
-}
-
-export type ScrapeTAScheme = {
-  [key: string]: string | SchemeOptions | ScrapeTAScheme
-}
+import {
+  ScrapeTAExtraParams,
+  ScrapeTARequest,
+  ScrapeTAScheme,
+  ScrapeTAResult
+} from './typings'
+export * from './typings'
 
 /**
  * Create an instance of node-fetch with managed cookies
  *
- * @param {ReqWithCookies} query
+ * @param {ScrapeTAExtraParams} query
  * @returns {Promise<typeof nodeFetch>}
  */
-async function withCookies(query: RequestWithCookies): Promise<typeof nodeFetch> {
+async function withCookies(query: ScrapeTAExtraParams): Promise<typeof nodeFetch> {
   try {
     const { default: fetchCookie } = await import('fetch-cookie/node-fetch')
     const cookieJar = typeof query.cookieJar === 'boolean' ? undefined : query.cookieJar
@@ -47,12 +27,12 @@ async function withCookies(query: RequestWithCookies): Promise<typeof nodeFetch>
 /**
  * Get HTML body and transform it as user-designed object
  *
- * @param {BasicReq} query
- * @param {Scheme} scheme
+ * @param {ScrapeTARequest} query
+ * @param {ScrapeTAScheme} scheme
  *
- * @returns {Promise<Result>}
+ * @returns {Promise<TResult>}
  */
-export default async function (
+export async function scrapeTA(
   request: ScrapeTARequest,
   scheme: ScrapeTAScheme
 ): Promise<ScrapeTAResult> {

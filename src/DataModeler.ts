@@ -1,32 +1,6 @@
 import cheerio from 'cheerio'
-import { ScrapeTAScheme } from '.'
-
-export class SelectorOptions {
-  readonly selector: string = ''
-  readonly isTrimmed: boolean = true
-  readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
-  readonly attribute?: string
-  readonly transformer?: (value: string) => unknown
-  // eslint-disable-next-line no-use-before-define
-  readonly listModel?: string | ScrapeTAScheme
-
-  constructor(opts: string | Partial<SelectorOptions> = '') {
-    if (typeof opts === 'string') {
-      this.selector = opts
-    } else {
-      this.selector = opts.selector || ''
-      this.isTrimmed = opts.isTrimmed || true
-      this.accessor = opts.accessor || 'text'
-      this.attribute = opts.attribute
-      this.transformer = opts.transformer
-      this.listModel = opts.listModel
-    }
-  }
-
-  static get keys(): string[] {
-    return ['selector', 'isTrimmed', 'accessor', 'attribute', 'transformer', 'listModel']
-  }
-}
+import { ScrapeTAScheme } from './typings'
+import { SchemeOptions } from './SchemeOptions'
 
 enum EValueType {
   SIMPLE,
@@ -65,7 +39,7 @@ export class DataModeler {
         continue
       }
 
-      const opts = new SelectorOptions(value)
+      const opts = new SchemeOptions(value)
       const cheerioRoot =
         context && opts.selector
           ? this.$root(opts.selector, context)
@@ -96,9 +70,9 @@ export class DataModeler {
   ): EValueType | void {
     if (typeof scheme === 'string') return EValueType.SIMPLE
     else if (typeof scheme === 'object') {
-      const opts = scheme as SelectorOptions
+      const opts = scheme as SchemeOptions
       const isSimple =
-        SelectorOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
+        SchemeOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
       if (isSimple) return EValueType.SIMPLE
 
       const isList = opts.selector && opts.listModel
@@ -114,11 +88,11 @@ export class DataModeler {
    * Process single item
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeOptions} opts
    *
    * @returns {unknown}
    */
-  private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
+  private processSingleItem(element: cheerio.Cheerio, opts: SchemeOptions): unknown {
     let value =
       typeof opts.accessor === 'function'
         ? opts.accessor(element)
@@ -137,14 +111,14 @@ export class DataModeler {
    * Process basic list
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeOptions} opts
    *
    * @returns {unknown[]}
    */
-  private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown[] {
+  private processListItem(element: cheerio.Cheerio, opts: SchemeOptions): unknown[] {
     if (!opts.listModel) return []
     const values = []
-    const listOpts = new SelectorOptions(opts.listModel)
+    const listOpts = new SchemeOptions(opts.listModel)
     const children = element.find(listOpts.selector)
     for (let i = 0; i < children.length; i++) {
       const value = this.processSingleItem(children.eq(i), listOpts)
@@ -157,13 +131,13 @@ export class DataModeler {
    * Process list of objects
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeOptions} opts
    *
    * @returns {Promise<Record<string, unknown>>[]}
    */
   private processListObjectItem(
     element: cheerio.Cheerio,
-    opts: SelectorOptions
+    opts: SchemeOptions
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
