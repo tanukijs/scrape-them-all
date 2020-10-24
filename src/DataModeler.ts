@@ -1,42 +1,5 @@
 import cheerio from 'cheerio'
-
-export class SelectorOptions {
-  readonly selector: string = ''
-  readonly isTrimmed: boolean = true
-  readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
-  readonly attribute?: string
-  readonly transformer?: (value: string) => unknown
-  // eslint-disable-next-line no-use-before-define
-  readonly listModel?: string | IScheme
-
-  constructor(opts: string | Partial<SelectorOptions> = '') {
-    if (typeof opts === 'string') {
-      this.selector = opts
-    } else {
-      this.selector = opts.selector || ''
-      this.isTrimmed = opts.isTrimmed || true
-      this.accessor = opts.accessor || 'text'
-      this.attribute = opts.attribute
-      this.transformer = opts.transformer
-      this.listModel = opts.listModel
-    }
-  }
-
-  static get keys(): string[] {
-    return ['selector', 'isTrimmed', 'accessor', 'attribute', 'transformer', 'listModel']
-  }
-}
-
-export interface IScheme {
-  [key: string]: string | Partial<SelectorOptions> | IScheme
-}
-
-enum EValueType {
-  SIMPLE,
-  LIST,
-  LIST_OBJECT,
-  NESTED
-}
+import { EOptionType, SchemeInterpreter } from './SchemeInterpreter'
 
 export class DataModeler {
   private $root: cheerio.Root
@@ -48,78 +11,56 @@ export class DataModeler {
   /**
    * Generate data from HTML body & user-designed JSON scheme
    *
-   * @param {IScheme} dataModel
+   * @param {SchemeInterpreter} opts
    * @param {cheerio.Cheerio} [context]
    *
    * @returns {Promise<Record<string, unknown>>}
    */
   async generate(
-    dataModel: IScheme,
+    opts: SchemeInterpreter,
     context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
+    if (opts.type !== EOptionType.OBJECT)
+      throw new Error('Schema passed to generate() must be a root object.')
+
     const mappedResult = {}
 
-    for (const key in dataModel) {
-      const value = dataModel[key]
-      const type = this.getValueType(value)
+    for (const key in opts.children) {
+      const value = new SchemeInterpreter(opts.children[key])
+      const cheerioRoot =
+        context && value.selector
+          ? this.$root(value.selector, context)
+          : context || this.$root(value.selector)
 
-      if (type === EValueType.NESTED) {
-        mappedResult[key] = await this.generate(value as IScheme, context)
+      if (value.type === EOptionType.OBJECT) {
+        mappedResult[key] = await this.generate(value, cheerioRoot)
         continue
       }
 
-      const opts = new SelectorOptions(value)
-      const cheerioRoot =
-        context && opts.selector
-          ? this.$root(opts.selector, context)
-          : context || this.$root(opts.selector)
       const result =
-        type === EValueType.SIMPLE
-          ? this.processSingleItem(cheerioRoot, opts)
-          : type === EValueType.LIST
-          ? this.processListItem(cheerioRoot, opts)
-          : type === EValueType.LIST_OBJECT
-          ? this.processListObjectItem(cheerioRoot, opts)
+        value.type === EOptionType.VALUE
+          ? this.processValue(cheerioRoot, value)
+          : value.type === EOptionType.ARRAY
+          ? this.processArray(cheerioRoot, value)
+          : value.type === EOptionType.OBJECT_ARRAY
+          ? this.processObjectArray(cheerioRoot, value)
           : undefined
       mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
+      continue
     }
 
     return mappedResult
   }
 
   /**
-   * Get type of an input
-   *
-   * @param {IScheme[K]} scheme
-   *
-   * @returns {(EValueType | void)}
-   */
-  private getValueType<K extends keyof IScheme>(scheme: IScheme[K]): EValueType | void {
-    if (typeof scheme === 'string') return EValueType.SIMPLE
-    else if (typeof scheme === 'object') {
-      const opts = scheme as SelectorOptions
-      const isSimple =
-        SelectorOptions.keys.filter((key) => key in opts).length > 0 && !opts.listModel
-      if (isSimple) return EValueType.SIMPLE
-
-      const isList = opts.selector && opts.listModel
-      const isObjectList =
-        isList && this.getValueType(opts.listModel || {}) !== EValueType.SIMPLE
-      if (isObjectList) return EValueType.LIST_OBJECT
-      if (isList) return EValueType.LIST
-      return EValueType.NESTED
-    }
-  }
-
-  /**
    * Process single item
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {unknown}
    */
-  private processSingleItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown {
+  private processValue(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown {
     let value =
       typeof opts.accessor === 'function'
         ? opts.accessor(element)
@@ -138,17 +79,17 @@ export class DataModeler {
    * Process basic list
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {unknown[]}
    */
-  private processListItem(element: cheerio.Cheerio, opts: SelectorOptions): unknown[] {
+  private processArray(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown[] {
     if (!opts.listModel) return []
     const values = []
-    const listOpts = new SelectorOptions(opts.listModel)
+    const listOpts = opts.listModel as SchemeInterpreter
     const children = element.find(listOpts.selector)
     for (let i = 0; i < children.length; i++) {
-      const value = this.processSingleItem(children.eq(i), listOpts)
+      const value = this.processValue(children.eq(i), listOpts)
       values.push(value)
     }
     return values
@@ -158,17 +99,17 @@ export class DataModeler {
    * Process list of objects
    *
    * @param {cheerio.Cheerio} element
-   * @param {SelectorOptions} opts
+   * @param {SchemeInterpreter} opts
    *
    * @returns {Promise<Record<string, unknown>>[]}
    */
-  private processListObjectItem(
+  private processObjectArray(
     element: cheerio.Cheerio,
-    opts: SelectorOptions
+    opts: SchemeInterpreter
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
-      const value = this.generate(opts.listModel as IScheme, element.eq(i))
+      const value = this.generate(opts.listModel as SchemeInterpreter, element.eq(i))
       values.push(value)
     }
     return values

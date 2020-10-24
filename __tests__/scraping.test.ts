@@ -1,4 +1,4 @@
-import { ScrapeTA } from '../src'
+import { scrapeTA } from '../src'
 import { createServer, Server } from 'http'
 import { readFileSync } from 'fs'
 import { join } from 'path'
@@ -21,7 +21,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape by simply storing redirects in cookies', async () => {
-    const { response, data } = await ScrapeTA(
+    const { response, data } = await scrapeTA(
       { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
       {
         month: {
@@ -36,7 +36,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape with custom headers to get data modified by AJAX', async () => {
-    const { response, data } = await ScrapeTA(
+    const { response, data } = await scrapeTA(
       {
         url:
           'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',
@@ -59,10 +59,14 @@ describe('Scrape-them-all', () => {
     })
   })
 
-  test('scrape simple data', async () => {
-    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
-      title: 'h1.title',
-      description: '.description',
+  test('scrape basic data', async () => {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
+      title: {
+        selector: 'h1.title'
+      },
+      description: {
+        selector: '.description'
+      },
       date: {
         selector: '.date',
         transformer: (x) => new Date(x)
@@ -77,10 +81,12 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape list', async () => {
-    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
-        listModel: 'li'
+        listModel: {
+          selector: 'li'
+        }
       }
     })
     expect(response.ok).toBe(true)
@@ -90,7 +96,7 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape and transform list', async () => {
-    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
         listModel: {
@@ -106,17 +112,23 @@ describe('Scrape-them-all', () => {
   })
 
   test('scrape nested objects', async () => {
-    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       nested: {
+        selector: '.nested',
         foo: {
           level1: {
+            selector: '.level1',
             level2: {
-              selector: '.nested .level1 span',
+              selector: 'span',
               accessor: (x) => x.eq(1).text()
             }
           },
-          level1Text: '.nested span',
-          level2Text: '.nested .level2'
+          level1Text: {
+            selector: 'span'
+          },
+          level2Text: {
+            selector: '.level2'
+          }
         }
       }
     })
@@ -127,15 +139,15 @@ describe('Scrape-them-all', () => {
           level1: {
             level2: '2'
           },
-          level2Text: '2',
-          level1Text: 'Foo12'
+          level1Text: 'Foo12',
+          level2Text: '2'
         }
       }
     })
   })
 
   test('scrape closest sample', async () => {
-    const { response, data } = await ScrapeTA(`http://localhost:${port}`, {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       addresses: {
         selector: 'table tbody tr',
         listModel: {

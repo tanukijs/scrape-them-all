@@ -1,6 +1,19 @@
 {
   "name": "scrape-them-all",
   "description": "🚀 An easy-to-handle Node.js scraper that allow you to scrape them all in a record time.",
+  "version": "1.0.4",
+  "license": "MIT",
+  "author": "Tanuki <tanuki.contact@gmail.com> (https://github.com/tanukijs)",
+  "contributors": [
+    "Aperrix <aperrix@gmail.com> (https://github.com/Aperrix)"
+  ],
+  "repository": "https://github.com/tanukijs/scrape-them-all.git",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10"
+  },
   "keywords": [
     "scraper",
     "node-scraper",
@@ -12,20 +25,12 @@
     "crawler",
     "crawling"
   ],
-  "version": "1.0.3",
-  "license": "MIT",
-  "author": "Tanuki <tanuki.contact@gmail.com> (https://github.com/tanukijs)",
-  "contributors": [
-    "Aperrix <aperrix@gmail.com> (https://github.com/Aperrix)"
-  ],
-  "repository": "https://github.com/tanukijs/scrape-them-all.git",
-  "source": "src/index.ts",
-  "main": "dist/index.js",
   "scripts": {
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
     "lintfix": "eslint --fix --ext .ts --ignore-path .gitignore .",
     "build": "rimraf dist && tsc -p tsconfig.json",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "npm run build && npm run test"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
