@@ -27,9 +27,11 @@ export class SchemeInterpreter {
       this.transformer = opts.transformer
       this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
 
+      const reservedKeys = Object.keys(this)
       for (const key in opts) {
-        if (Object.keys(this).includes(key)) continue
-        this.children[key] = opts[key]
+        const normalizedKey = key[0] === '_' ? key.slice(1) : key
+        if (reservedKeys.includes(key) && normalizedKey === key) continue
+        this.children[normalizedKey] = opts[key]
       }
     }
   }
