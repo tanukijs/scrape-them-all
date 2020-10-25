@@ -167,4 +167,17 @@ describe('Scrape-them-all', () => {
       ]
     })
   })
+
+  test('scrape using reserved keys', async () => {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
+      title: 'h1.title',
+      _attribute: '.attribute'
+    })
+
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
+      title: 'Title',
+      attribute: 'dolor sit amet'
+    })
+  })
 })
