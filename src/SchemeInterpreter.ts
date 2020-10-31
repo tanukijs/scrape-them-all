@@ -34,6 +34,7 @@ export class SchemeInterpreter {
         this.children[normalizedKey] = opts[key]
       }
     }
+    this.validate()
   }
 
   /**
@@ -52,5 +53,28 @@ export class SchemeInterpreter {
     )
       return EOptionType.OBJECT_ARRAY
     return EOptionType.ARRAY
+  }
+
+  public validate(): void {
+    const expected = [
+      { property: 'selector', equalsTo: ['string'] },
+      { property: 'isTrimmed', equalsTo: ['boolean'] },
+      { property: 'accessor', equalsTo: ['string', 'function'] },
+      { property: 'attribute', equalsTo: ['string'] },
+      { property: 'transformer', equalsTo: ['function'] },
+      { property: 'listModel', equalsTo: ['string', 'object'] }
+    ]
+
+    for (const { property, equalsTo } of expected) {
+      if (!this[property]) continue
+      const asExpectedValue = equalsTo.map((type) => typeof this[property] === type)
+      if (asExpectedValue.includes(true)) continue
+      const errorTypes = equalsTo.join(' or a ')
+      const errorMessage = [
+        `The property "${property}" expects a ${errorTypes}.`,
+        `If you want to use "${property}" as a result key, prefix it with an underscore (the first will be stripped automatically).`
+      ].join(' ')
+      throw new Error(errorMessage)
+    }
   }
 }
