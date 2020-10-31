@@ -58,7 +58,7 @@ export class SchemeInterpreter {
   public validate(): void {
     const expected = [
       { property: 'selector', equalsTo: ['string'] },
-      { property: 'isTrimmed', equalsTo: ['boolean'] },
+      { property: 'trim', equalsTo: ['boolean'] },
       { property: 'accessor', equalsTo: ['string', 'function'] },
       { property: 'attribute', equalsTo: ['string'] },
       { property: 'transformer', equalsTo: ['function'] },

@@ -68,7 +68,7 @@ export class DataModeler {
         : null
 
     if (opts.attribute) value = element.attr(opts.attribute)
-    if (opts.trim && value && value === 'string') value = value.trim()
+    if (opts.trim && value && typeof value === 'string') value = value.trim()
     if (opts.transformer) value = opts.transformer(value)
 
     return value
