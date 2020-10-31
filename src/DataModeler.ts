@@ -41,12 +41,11 @@ export class DataModeler {
         value.type === EOptionType.VALUE
           ? this.processValue(cheerioRoot, value)
           : value.type === EOptionType.ARRAY
-          ? this.processArray(cheerioRoot, value)
+          ? this.processArray(cheerioRoot, value.listModel as SchemeInterpreter)
           : value.type === EOptionType.OBJECT_ARRAY
-          ? this.processObjectArray(cheerioRoot, value)
+          ? this.processObjectArray(cheerioRoot, value.listModel as SchemeInterpreter)
           : undefined
       mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
-      continue
     }
 
     return mappedResult
@@ -79,17 +78,18 @@ export class DataModeler {
    * Process basic list
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeInterpreter} opts
+   * @param {SchemeInterpreter} listModel
    *
    * @returns {unknown[]}
    */
-  private processArray(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown[] {
-    if (!opts.listModel) return []
+  private processArray(
+    element: cheerio.Cheerio,
+    listModel: SchemeInterpreter
+  ): unknown[] {
     const values = []
-    const listOpts = opts.listModel as SchemeInterpreter
-    const children = element.find(listOpts.selector)
+    const children = element.find(listModel.selector)
     for (let i = 0; i < children.length; i++) {
-      const value = this.processValue(children.eq(i), listOpts)
+      const value = this.processValue(children.eq(i), listModel)
       values.push(value)
     }
     return values
@@ -99,17 +99,17 @@ export class DataModeler {
    * Process list of objects
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeInterpreter} opts
+   * @param {SchemeInterpreter} listModel
    *
    * @returns {Promise<Record<string, unknown>>[]}
    */
   private processObjectArray(
     element: cheerio.Cheerio,
-    opts: SchemeInterpreter
+    listModel: SchemeInterpreter
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
-      const value = this.generate(opts.listModel as SchemeInterpreter, element.eq(i))
+      const value = this.generate(listModel as SchemeInterpreter, element.eq(i))
       values.push(value)
     }
     return values
