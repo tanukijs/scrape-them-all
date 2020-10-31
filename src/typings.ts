@@ -20,6 +20,7 @@ type TSchemeInterpreter = Partial<
     'selector' | 'accessor' | 'attribute' | 'isTrimmed' | 'listModel' | 'transformer'
   >
 >
+
 export type ScrapeTAScheme = {
   [key: string]: string | TSchemeInterpreter | ScrapeTAScheme
 }

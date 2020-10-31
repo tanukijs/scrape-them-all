@@ -3,70 +3,27 @@ import { createServer, Server } from 'http'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 
-describe('Scrape-them-all', () => {
-  let server: Server
-  const port = 8080
-  beforeAll((done) => {
-    server = createServer((_req, res) => {
-      const indexPath = join(__dirname, 'public/index.html')
-      const indexHTML = readFileSync(indexPath)
-      res.write(indexHTML)
-      res.end()
-    })
-    server.listen(port, () => done() && console.log('Server running on port 8080'))
-  })
+let server: Server
+const port = 8080
 
-  afterAll((done) => {
-    server.close(() => done())
+beforeAll((done) => {
+  server = createServer((_req, res) => {
+    const indexPath = join(__dirname, 'public/index.html')
+    const indexHTML = readFileSync(indexPath)
+    res.write(indexHTML)
+    res.end()
   })
+  server.listen(port, () => done() && console.log('Server running on port 8080'))
+})
+afterAll((done) => {
+  server.close(() => done())
+})
 
-  test('scrape by simply storing redirects in cookies', async () => {
-    const { response, data } = await scrapeTA(
-      { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
-      {
-        month: {
-          selector: '#almanax_day .day-text'
-        }
-      }
-    )
-    expect(response.ok).toBe(true)
-    expect(data).toEqual({
-      month: 'Javian'
-    })
-  })
-
-  test('scrape with custom headers to get data modified by AJAX', async () => {
-    const { response, data } = await scrapeTA(
-      {
-        url:
-          'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',
-        headers: {
-          'x-requested-with': 'XMLHttpRequest',
-          'x-pjax': 'true',
-          'x-pjax-container': '.ak-item-details-container'
-        }
-      },
-      {
-        effect: {
-          selector: '.ak-container.ak-content-list.ak-displaymode-col .ak-title',
-          accessor: (x) => x.eq(0).text()
-        }
-      }
-    )
-    expect(response.ok).toBe(true)
-    expect(data).toEqual({
-      effect: '120 Chance'
-    })
-  })
-
-  test('scrape basic data', async () => {
+describe('Scrape basic data', () => {
+  test('Directly target the HTML element', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      title: {
-        selector: 'h1.title'
-      },
-      description: {
-        selector: '.description'
-      },
+      title: 'h1.title',
+      description: '.description',
       date: {
         selector: '.date',
         transformer: (x) => new Date(x)
@@ -80,22 +37,25 @@ describe('Scrape-them-all', () => {
     })
   })
 
-  test('scrape list', async () => {
+  test('Use a reserved keyword', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      features: {
-        selector: '.features',
-        listModel: {
-          selector: 'li'
-        }
+      title: 'h1.title',
+      _attribute: {
+        selector: 'img',
+        attribute: 'src'
       }
     })
     expect(response.ok).toBe(true)
     expect(data).toEqual({
-      features: ['1', '2', '3', '4', '5', '6']
+      title: 'Title',
+      attribute:
+        'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/ee/ee276885cdbec23bdb9780509210c3c24dc7070e_full.jpg'
     })
   })
+})
 
-  test('scrape and transform list', async () => {
+describe('Scrape list', () => {
+  test('With transform', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       features: {
         selector: '.features',
@@ -111,7 +71,24 @@ describe('Scrape-them-all', () => {
     })
   })
 
-  test('scrape nested objects', async () => {
+  test('Without transform', async () => {
+    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
+      features: {
+        selector: '.features',
+        listModel: {
+          selector: 'li'
+        }
+      }
+    })
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
+      features: ['1', '2', '3', '4', '5', '6']
+    })
+  })
+})
+
+describe('Scrape nested object', () => {
+  test('Object nested with multiple custom keys', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       nested: {
         selector: '.nested',
@@ -146,14 +123,13 @@ describe('Scrape-them-all', () => {
     })
   })
 
-  test('scrape closest sample', async () => {
+  test('Scrape tables using accessor', async () => {
     const { response, data } = await scrapeTA(`http://localhost:${port}`, {
       addresses: {
         selector: 'table tbody tr',
         listModel: {
           address: '.address',
           city: {
-            selector: '',
             accessor: (x) => x.closest('table').find('thead .city').text()
           }
         }
@@ -167,17 +143,76 @@ describe('Scrape-them-all', () => {
       ]
     })
   })
+})
 
-  test('scrape using reserved keys', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      title: 'h1.title',
-      _attribute: '.attribute'
-    })
-
+describe('Scrape using options', () => {
+  test('Store redirections using cookieJar option', async () => {
+    const { response, data } = await scrapeTA(
+      { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
+      {
+        month: {
+          selector: '#almanax_day .day-text'
+        }
+      }
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
-      title: 'Title',
-      attribute: 'dolor sit amet'
+      month: 'Javian'
     })
+  })
+
+  test('Get data modified by AJAX using headers option', async () => {
+    const { response, data } = await scrapeTA(
+      {
+        url:
+          'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',
+        headers: {
+          'x-requested-with': 'XMLHttpRequest',
+          'x-pjax': 'true',
+          'x-pjax-container': '.ak-item-details-container'
+        }
+      },
+      {
+        effect: {
+          selector: '.ak-container.ak-content-list.ak-displaymode-col .ak-title',
+          accessor: (x) => x.eq(0).text()
+        }
+      }
+    )
+    expect(response.ok).toBe(true)
+    expect(data).toEqual({
+      effect: '120 Chance'
+    })
+  })
+})
+
+describe('Herror handling', () => {
+  test('Scrape invalid URL', async () => {
+    await expect(
+      scrapeTA('http://gertkafgzngegzegerj.com', {
+        title: 'h1.title'
+      })
+    ).rejects.toThrow()
+  })
+
+  test('Use reserved keyword directly', async () => {
+    await expect(
+      scrapeTA(`http://localhost:${port}`, {
+        attribute: 'h1.title'
+      })
+    ).rejects.toThrow('"attribute" is a reserved keyword, please prefix it with a "_"')
+  })
+
+  test('Use reserved keyword in nested object', async () => {
+    await expect(
+      scrapeTA(`http://localhost:${port}`, {
+        accessor: {
+          img: {
+            selector: 'img',
+            attribute: 'src'
+          }
+        }
+      })
+    ).rejects.toThrow('"accessor" is a reserved keyword, please prefix it with a "_"')
   })
 })
