@@ -200,7 +200,7 @@ describe('Herror handling', () => {
       scrapeTA(`http://localhost:${port}`, {
         attribute: 'h1.title'
       })
-    ).rejects.toThrow('"attribute" is a reserved keyword, please prefix it with a "_"')
+    ).rejects.toThrow('Root object must be a nested object.')
   })
 
   test('Use reserved keyword in nested object', async () => {
@@ -213,6 +213,8 @@ describe('Herror handling', () => {
           }
         }
       })
-    ).rejects.toThrow('"accessor" is a reserved keyword, please prefix it with a "_"')
+    ).rejects.toThrow(
+      'The property "accessor" expects a string or a function. If you want to use "accessor" as a result key, prefix it with an underscore (the first will be stripped automatically).'
+    )
   })
 })
