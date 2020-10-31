@@ -21,7 +21,7 @@ export class DataModeler {
     context?: cheerio.Cheerio
   ): Promise<Record<string, unknown>> {
     if (opts.type !== EOptionType.OBJECT)
-      throw new Error('Schema passed to generate() must be a root object.')
+      throw new Error('Root object must be a nested object.')
 
     const mappedResult = {}
 
