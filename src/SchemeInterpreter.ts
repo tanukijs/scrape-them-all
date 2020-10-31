@@ -9,7 +9,7 @@ export const enum EOptionType {
 
 export class SchemeInterpreter {
   readonly selector: string = ''
-  readonly isTrimmed: boolean = true
+  readonly trim: boolean = true
   readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
   readonly attribute?: string
   readonly transformer?: (value: string) => unknown
@@ -21,7 +21,7 @@ export class SchemeInterpreter {
       this.selector = opts
     } else {
       this.selector = opts.selector || ''
-      this.isTrimmed = opts.isTrimmed || true
+      this.trim = opts.trim || true
       this.accessor = opts.accessor || 'text'
       this.attribute = opts.attribute
       this.transformer = opts.transformer

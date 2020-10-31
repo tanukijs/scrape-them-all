@@ -29,7 +29,7 @@ export class DataModeler {
       const value = new SchemeInterpreter(opts.children[key])
       const cheerioRoot =
         context && value.selector
-          ? this.$root(value.selector, context)
+          ? context.find(value.selector)
           : context || this.$root(value.selector)
 
       if (value.type === EOptionType.OBJECT) {
@@ -68,9 +68,9 @@ export class DataModeler {
         ? element[opts.accessor]()
         : null
 
-    if (opts.attribute) value = element.attr(opts.attribute as string)
-    if (opts.isTrimmed && value && typeof value === 'string') value = value.trim()
-    if (typeof opts.transformer === 'function') value = opts.transformer(value)
+    if (opts.attribute) value = element.attr(opts.attribute)
+    if (opts.trim && value && value === 'string') value = value.trim()
+    if (opts.transformer) value = opts.transformer(value)
 
     return value
   }
