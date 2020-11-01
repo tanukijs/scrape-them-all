@@ -55,6 +55,12 @@ export class SchemeInterpreter {
     return EOptionType.ARRAY
   }
 
+  /**
+   * Validate current SchemeInterpreter object
+   *
+   * @returns {void}
+   * @throws {Error}
+   */
   public validate(): void {
     const expected = [
       { property: 'selector', equalsTo: ['string'] },

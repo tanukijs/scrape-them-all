@@ -109,7 +109,7 @@ export class DataModeler {
   ): Promise<Record<string, unknown>>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
-      const value = this.generate(listModel as SchemeInterpreter, element.eq(i))
+      const value = this.generate(listModel, element.eq(i))
       values.push(value)
     }
     return values
