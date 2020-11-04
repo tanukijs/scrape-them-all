@@ -9,7 +9,7 @@ export const enum EOptionType {
 
 export class SchemeInterpreter {
   readonly selector: string = ''
-  readonly isTrimmed: boolean = true
+  readonly trim: boolean = true
   readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
   readonly attribute?: string
   readonly transformer?: (value: string) => unknown
@@ -21,17 +21,20 @@ export class SchemeInterpreter {
       this.selector = opts
     } else {
       this.selector = opts.selector || ''
-      this.isTrimmed = opts.isTrimmed || true
+      this.trim = opts.trim || true
       this.accessor = opts.accessor || 'text'
       this.attribute = opts.attribute
       this.transformer = opts.transformer
       this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
 
+      const reservedKeys = Object.keys(this)
       for (const key in opts) {
-        if (Object.keys(this).includes(key)) continue
-        this.children[key] = opts[key]
+        const normalizedKey = key[0] === '_' ? key.slice(1) : key
+        if (reservedKeys.includes(key) && normalizedKey === key) continue
+        this.children[normalizedKey] = opts[key]
       }
     }
+    this.validate()
   }
 
   /**
@@ -50,5 +53,34 @@ export class SchemeInterpreter {
     )
       return EOptionType.OBJECT_ARRAY
     return EOptionType.ARRAY
+  }
+
+  /**
+   * Validate current SchemeInterpreter object
+   *
+   * @returns {void}
+   * @throws {Error}
+   */
+  public validate(): void {
+    const expected = [
+      { property: 'selector', equalsTo: ['string'] },
+      { property: 'trim', equalsTo: ['boolean'] },
+      { property: 'accessor', equalsTo: ['string', 'function'] },
+      { property: 'attribute', equalsTo: ['string'] },
+      { property: 'transformer', equalsTo: ['function'] },
+      { property: 'listModel', equalsTo: ['string', 'object'] }
+    ]
+
+    for (const { property, equalsTo } of expected) {
+      if (!this[property]) continue
+      const asExpectedValue = equalsTo.map((type) => typeof this[property] === type)
+      if (asExpectedValue.includes(true)) continue
+      const errorTypes = equalsTo.join(' or a ')
+      const errorMessage = [
+        `The property "${property}" expects a ${errorTypes}.`,
+        `If you want to use "${property}" as a result key, prefix it with an underscore (the first will be stripped automatically).`
+      ].join(' ')
+      throw new Error(errorMessage)
+    }
   }
 }

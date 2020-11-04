@@ -7,7 +7,6 @@ import {
   ScrapeTAScheme,
   ScrapeTAResult
 } from './typings'
-export * from './typings'
 
 /**
  * Create an instance of node-fetch with managed cookies
@@ -31,7 +30,7 @@ async function withCookies(query: ScrapeTAExtraParams): Promise<typeof nodeFetch
  * @param {ScrapeTARequest} query
  * @param {ScrapeTAScheme} scheme
  *
- * @returns {Promise<TResult>}
+ * @returns {Promise<ScrapeTAResult>}
  */
 export async function scrapeTA(
   request: ScrapeTARequest,
@@ -51,3 +50,5 @@ export async function scrapeTA(
   const data = await dataModeler.generate(usableScheme)
   return { response, data }
 }
+
+export * from './typings'

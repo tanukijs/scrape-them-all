@@ -24,15 +24,16 @@ yarn add scrape-them-all
 yarn add fetch-cookie #optional
 ```
 
-
 `fetch-cookie` is only required if you plan to use the `cookieJar` option on requests.
 
-**⚠ If you get a ``too many redirects`` error when you scrape, we recommend to install ``fetch-cookie`` and use the option ``cookieJar: true`` in your request. You can also pass an instance of `tough.CookieJar` to this parameter.**
+**⚠ If you get a `too many redirects` error when you scrape, we recommend to install `fetch-cookie` and use the option `cookieJar: true` in your request. You can also pass an instance of `tough.CookieJar` to this parameter.**
 
 Example:
+
 ```js
 scrapeTA({ url: 'https://google.com', cookieJar: true }, ...)
 ```
+
 ---
 
 # 📚 Documentation
@@ -50,14 +51,14 @@ Returns:
 
 ## Schema options
 
-| Option          | Type                   | Description                                                                                                                              |
-| --------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **selector**    | `String` or `Object`   | Can be a string expression, DOM Element, array of DOM elements, or cheerio object.                                                       |  |
-| **isTrimmed**   | `Boolean`              | Trim whitespaces in the result. **Default as ``true``**.                                                                                         |
-| **attribute**   | `String`               | Return the value of the indicated attribute on the selected element.                                                                     |
-| **access**    | `String` or `Function` | Cheerio access method name (like `html` for returning html code) or a custom function that take a Cheerio instance as first parameter. |
-| **transform** | `Function`             | The first parameter is your current value for the selected item. Can return a `Promise`.                                                 |
-| **listModel**   | `Object`               | Contains the options stated above in case of a list.                                                                                     |
+| Option        | Type                   | Description                                                                                                                            |
+| ------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **selector**  | `String` or `Object`   | Can be a string expression, DOM Element, array of DOM elements, or cheerio object.                                                     |  |
+| **trim**      | `Boolean`              | Trim whitespaces in the result. **Default as `true`**.                                                                                 |
+| **attribute** | `String`               | Return the value of the indicated attribute on the selected element.                                                                   |
+| **accessor**    | `String` or `Function` | Cheerio access method name (like `html` for returning html code) or a custom function that take a Cheerio instance as first parameter. |
+| **transformer** | `Function`             | The first parameter is your current value for the selected item. Can return a `Promise`.                                               |
+| **listModel** | `Object`               | Contains the options stated above in case of a list.                                                                                   |
 
 ## Example output
 
@@ -88,9 +89,9 @@ ScrapeTA('url_or_https_options', {
   title: '.header h1',
   description: {
     selector: '.header p',
-    access: 'html',
-    //  access: selected => selected.html(),
-    isTrimmed: false
+    accessor: 'html',
+    //  accessor: selected => selected.html(),
+    trim: false
   },
   image: {
     selector: 'img',
@@ -98,7 +99,7 @@ ScrapeTA('url_or_https_options', {
   },
   price: {
     selector: '.footer #price',
-    transform: (value) => parseFloat(value)
+    transformer: (value) => parseFloat(value)
   },
   users: {
     selector: '.body .users',
@@ -106,8 +107,7 @@ ScrapeTA('url_or_https_options', {
       username: '.username',
       badges: {
         selector: '.badges',
-        isListItem: true,
-        dataModel: {
+        listModel: {
           name: '.badgeName'
         }
       }
@@ -121,7 +121,8 @@ ScrapeTA('url_or_https_options', {
 ---
 
 # 💪 Contributions
- TODO
+
+TODO
 
 ---
 
