@@ -25,12 +25,14 @@ export class SchemeInterpreter {
       this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
       this.attribute = opts.attribute
       this.transformer = opts.transformer
-      const reservedKeys = Object.keys(this)
 
+      const reservedKeys = Object.keys(this)
       for (const key in opts) {
         const normalizedKey = key[0] === '_' ? key.slice(1) : key
-        if (reservedKeys.includes(key) && normalizedKey === key) continue
-        this.children[normalizedKey] = opts[key]
+        const isReservedKey = reservedKeys.includes(normalizedKey)
+        if (isReservedKey && normalizedKey === key) continue
+        const usedKey = isReservedKey ? normalizedKey : key
+        this.children[usedKey] = opts[key]
       }
 
       this.accessor =
