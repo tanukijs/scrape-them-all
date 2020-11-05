@@ -32,20 +32,39 @@ export class DataModeler {
           ? context.find(value.selector)
           : context || this.$root(value.selector)
 
-      if (value.type === EOptionType.OBJECT) {
-        mappedResult[key] = await this.generate(value, cheerioRoot)
+      const processed = await this.processValue(cheerioRoot, value)
+      if (value.type === EOptionType.VALUE) {
+        mappedResult[key] = processed
         continue
       }
 
-      const result =
-        value.type === EOptionType.VALUE
-          ? this.processValue(cheerioRoot, value)
-          : value.type === EOptionType.ARRAY
-          ? this.processArray(cheerioRoot, value.listModel as SchemeInterpreter)
+      if (!(processed instanceof cheerio))
+        throw new Error('Evaluated schema must return a list of cheerio elements.')
+
+      if (value.type === EOptionType.OBJECT) {
+        mappedResult[key] = await this.generate(value, processed as cheerio.Cheerio)
+        continue
+      }
+
+      const method =
+        value.type === EOptionType.ARRAY
+          ? this.processArray
           : value.type === EOptionType.OBJECT_ARRAY
-          ? this.processObjectArray(cheerioRoot, value.listModel as SchemeInterpreter)
+          ? this.processObjectArray
           : undefined
-      mappedResult[key] = await (Array.isArray(result) ? Promise.all(result) : result)
+
+      if (method === undefined) {
+        const errorMessage =
+          'Unable to recognize schema type. Please report this error with your schema as attachment.'
+        throw new Error(errorMessage)
+      }
+
+      const result = method.call(
+        this,
+        processed as cheerio.Cheerio,
+        value.listModel as SchemeInterpreter
+      )
+      mappedResult[key] = await Promise.all(result)
     }
 
     return mappedResult

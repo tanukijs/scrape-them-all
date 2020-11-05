@@ -22,17 +22,19 @@ export class SchemeInterpreter {
     } else {
       this.selector = opts.selector || ''
       this.trim = opts.trim || true
-      this.accessor = opts.accessor || 'text'
+      this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
       this.attribute = opts.attribute
       this.transformer = opts.transformer
-      this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
-
       const reservedKeys = Object.keys(this)
+
       for (const key in opts) {
         const normalizedKey = key[0] === '_' ? key.slice(1) : key
         if (reservedKeys.includes(key) && normalizedKey === key) continue
         this.children[normalizedKey] = opts[key]
       }
+
+      this.accessor =
+        opts.accessor || (this.type === EOptionType.VALUE ? 'text' : (x) => x)
     }
     this.validate()
   }
