@@ -3,9 +3,5 @@ __tests__/
 .github/
 local
 .editorconfig
-.eslintrc
-.prettierrc
 changelog-ci-config.json
-CHANGELOG.md
-jest.config.js
 tsconfig.json
