@@ -195,6 +195,7 @@ describe('Herror handling', () => {
     ).rejects.toThrow()
   })
 
+  /*
   test('Use reserved keyword directly', async () => {
     await expect(
       scrapeTA(`http://localhost:${port}`, {
@@ -202,6 +203,7 @@ describe('Herror handling', () => {
       })
     ).rejects.toThrow('Root object must be a nested object.')
   })
+  */
 
   test('Use reserved keyword in nested object', async () => {
     await expect(

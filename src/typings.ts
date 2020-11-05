@@ -11,7 +11,7 @@ export type ScrapeTARequest = RequestInfo | (ScrapeTAExtraParams & RequestInit)
 
 export type ScrapeTAResult = {
   response: Response
-  data: Record<string, unknown>
+  data: unknown
 }
 
 type TSchemeInterpreter = Partial<

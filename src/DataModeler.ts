@@ -14,60 +14,51 @@ export class DataModeler {
    * @param {SchemeInterpreter} opts
    * @param {cheerio.Cheerio} [context]
    *
-   * @returns {Promise<Record<string, unknown>>}
+   * @returns {Promise<unknown>}
    */
-  async generate(
-    opts: SchemeInterpreter,
-    context?: cheerio.Cheerio
-  ): Promise<Record<string, unknown>> {
-    if (opts.type !== EOptionType.OBJECT)
-      throw new Error('Root object must be a nested object.')
+  async generate(opts: SchemeInterpreter, context?: cheerio.Cheerio): Promise<unknown> {
+    const cheerioRoot =
+      context && opts.selector
+        ? context.find(opts.selector)
+        : context || (opts.selector ? this.$root(opts.selector) : this.$root.root())
+    const processed = await this.processValue(cheerioRoot, opts)
 
-    const mappedResult = {}
+    if (opts.type === EOptionType.VALUE) {
+      return processed
+    }
 
-    for (const key in opts.children) {
-      const value = new SchemeInterpreter(opts.children[key])
-      const cheerioRoot =
-        context && value.selector
-          ? context.find(value.selector)
-          : context || this.$root(value.selector)
-
-      const processed = await this.processValue(cheerioRoot, value)
-      if (value.type === EOptionType.VALUE) {
-        mappedResult[key] = processed
-        continue
+    if (opts.type === EOptionType.OBJECT) {
+      const mappedResult = {}
+      for (const key in opts.children) {
+        const child = new SchemeInterpreter(opts.children[key])
+        mappedResult[key] = await this.generate(child, processed as cheerio.Cheerio)
       }
+      return mappedResult
+    }
 
+    if (opts.type === EOptionType.ARRAY) {
       if (!(processed instanceof cheerio))
         throw new Error('Evaluated schema must return a list of cheerio elements.')
 
-      if (value.type === EOptionType.OBJECT) {
-        mappedResult[key] = await this.generate(value, processed as cheerio.Cheerio)
-        continue
-      }
-
-      const method =
-        value.type === EOptionType.ARRAY
-          ? this.processArray
-          : value.type === EOptionType.OBJECT_ARRAY
-          ? this.processObjectArray
-          : undefined
-
-      if (method === undefined) {
-        const errorMessage =
-          'Unable to recognize schema type. Please report this error with your schema as attachment.'
-        throw new Error(errorMessage)
-      }
-
-      const result = method.call(
-        this,
+      const result = this.processArray(
         processed as cheerio.Cheerio,
-        value.listModel as SchemeInterpreter
+        opts.listModel as SchemeInterpreter
       )
-      mappedResult[key] = await Promise.all(result)
+      return Promise.all(result)
     }
 
-    return mappedResult
+    if (opts.type === EOptionType.OBJECT_ARRAY) {
+      if (!(processed instanceof cheerio))
+        throw new Error('Evaluated schema must return a list of cheerio elements.')
+
+      const result = this.processObjectArray(
+        processed as cheerio.Cheerio,
+        opts.listModel as SchemeInterpreter
+      )
+      return Promise.all(result)
+    }
+
+    return undefined
   }
 
   /**
@@ -120,12 +111,12 @@ export class DataModeler {
    * @param {cheerio.Cheerio} element
    * @param {SchemeInterpreter} listModel
    *
-   * @returns {Promise<Record<string, unknown>>[]}
+   * @returns {Promise<unknown>[]}
    */
   private processObjectArray(
     element: cheerio.Cheerio,
     listModel: SchemeInterpreter
-  ): Promise<Record<string, unknown>>[] {
+  ): Promise<unknown>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
       const value = this.generate(listModel, element.eq(i))
