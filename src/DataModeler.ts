@@ -36,22 +36,14 @@ export class DataModeler {
       return mappedResult
     }
 
-    if (opts.type === EOptionType.ARRAY) {
+    if (opts.type === EOptionType.ARRAY || opts.type === EOptionType.OBJECT_ARRAY) {
       if (!(processed instanceof cheerio))
         throw new Error('Evaluated schema must return a list of cheerio elements.')
 
-      const result = this.processArray(
-        processed as cheerio.Cheerio,
-        opts.listModel as SchemeInterpreter
-      )
-      return Promise.all(result)
-    }
-
-    if (opts.type === EOptionType.OBJECT_ARRAY) {
-      if (!(processed instanceof cheerio))
-        throw new Error('Evaluated schema must return a list of cheerio elements.')
-
-      const result = this.processObjectArray(
+      const method =
+        opts.type === EOptionType.ARRAY ? this.processArray : this.processObjectArray
+      const result = method.call(
+        this,
         processed as cheerio.Cheerio,
         opts.listModel as SchemeInterpreter
       )
