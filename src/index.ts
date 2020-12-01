@@ -1,12 +1,30 @@
-import nodeFetch, { RequestInfo, RequestInit } from 'node-fetch'
+import nodeFetch, { RequestInfo, RequestInit, Response } from 'node-fetch'
 import { SchemeInterpreter } from './SchemeInterpreter'
 import { DataModeler } from './DataModeler'
-import {
-  ScrapeTAExtraParams,
-  ScrapeTARequest,
-  ScrapeTAScheme,
-  ScrapeTAResult
-} from './typings'
+import { CookieJar } from 'fetch-cookie'
+
+type TSchemeInterpreter = Partial<
+  Pick<
+    SchemeInterpreter,
+    'selector' | 'trim' | 'accessor' | 'attribute' | 'transformer' | 'listModel'
+  >
+>
+
+export type ScrapeTAExtraParams = {
+  url: RequestInfo
+  cookieJar?: boolean | CookieJar
+}
+
+export type ScrapeTAScheme = {
+  [key: string]: string | TSchemeInterpreter | ScrapeTAScheme
+}
+
+export type ScrapeTARequest = RequestInfo | (ScrapeTAExtraParams & RequestInit)
+
+export type ScrapeTAResult = {
+  response: Response
+  data: unknown
+}
 
 /**
  * Create an instance of node-fetch with managed cookies
@@ -50,5 +68,3 @@ export async function scrapeTA(
   const data = await dataModeler.generate(usableScheme)
   return { response, data }
 }
-
-export * from './typings'

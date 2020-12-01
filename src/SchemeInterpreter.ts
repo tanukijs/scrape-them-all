@@ -1,4 +1,4 @@
-import { ScrapeTAScheme } from './typings'
+import { ScrapeTAScheme } from './index'
 
 export const enum EOptionType {
   VALUE,

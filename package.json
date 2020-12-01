@@ -28,14 +28,13 @@
   "scripts": {
     "lint": "eslint --ext .ts --ignore-path .gitignore .",
     "lintfix": "eslint --fix --ext .ts --ignore-path .gitignore .",
-    "build": "rimraf dist && tsc -p tsconfig.json",
+    "build": "microbundle --format cjs --target node --compress",
     "test": "jest",
     "prepare": "npm run build && npm run test"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "node-fetch": "^2.6.1",
-    "tslib": "^2.0.3"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "@types/cheerio": "^0.22.22",
@@ -54,9 +53,10 @@
     "eslint-plugin-standard": "^4.0.1",
     "fetch-cookie": "^0.10.1",
     "jest": "^26.5.3",
+    "microbundle": "^0.12.4",
     "prettier": "^2.1.2",
-    "rimraf": "^3.0.2",
     "ts-jest": "^26.4.1",
+    "tslib": "^2.0.3",
     "typescript": "^4.0.3"
   }
 }
