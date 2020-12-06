@@ -21,9 +21,9 @@ export type ScrapeTAScheme = {
 
 export type ScrapeTARequest = RequestInfo | (ScrapeTAExtraParams & RequestInit)
 
-export type ScrapeTAResult = {
+export type ScrapeTAResult<T> = {
   response: Response
-  data: unknown
+  data: T
 }
 
 /**
@@ -48,12 +48,12 @@ async function withCookies(query: ScrapeTAExtraParams): Promise<typeof nodeFetch
  * @param {ScrapeTARequest} query
  * @param {ScrapeTAScheme} scheme
  *
- * @returns {Promise<ScrapeTAResult>}
+ * @returns {Promise<ScrapeTAResult<T>>}
  */
-export async function scrapeTA(
+export async function scrapeTA<T>(
   request: ScrapeTARequest,
   scheme: ScrapeTAScheme
-): Promise<ScrapeTAResult> {
+): Promise<ScrapeTAResult<T>> {
   const fetch =
     typeof request === 'object' && 'cookieJar' in request && request.cookieJar
       ? await withCookies(request)
@@ -65,6 +65,6 @@ export async function scrapeTA(
   const responseHTML = await response.text()
   const dataModeler = new DataModeler(responseHTML)
   const usableScheme = new SchemeInterpreter(scheme)
-  const data = await dataModeler.generate(usableScheme)
+  const data = (await dataModeler.generate(usableScheme)) as T
   return { response, data }
 }
