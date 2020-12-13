@@ -1,4 +1,4 @@
-import { ScrapeTAScheme } from './index'
+import { ScrapeTASchema } from './index'
 
 export const enum EOptionType {
   VALUE,
@@ -7,22 +7,22 @@ export const enum EOptionType {
   OBJECT_ARRAY
 }
 
-export class SchemeInterpreter {
+export class SchemaInterpreter {
   readonly selector: string = ''
   readonly trim: boolean = true
   readonly accessor: string | ((node: cheerio.Cheerio) => unknown) = 'text'
   readonly attribute?: string
   readonly transformer?: (value: string) => unknown
-  readonly listModel?: string | ScrapeTAScheme | SchemeInterpreter
-  readonly children: Record<string, string | ScrapeTAScheme> = {}
+  readonly listModel?: string | ScrapeTASchema | SchemaInterpreter
+  readonly children: Record<string, string | ScrapeTASchema> = {}
 
-  constructor(opts: string | Partial<SchemeInterpreter> = '') {
+  constructor(opts: string | Partial<SchemaInterpreter> = '') {
     if (typeof opts === 'string') {
       this.selector = opts
     } else {
       this.selector = opts.selector || ''
       this.trim = opts.trim || true
-      this.listModel = opts.listModel ? new SchemeInterpreter(opts.listModel) : undefined
+      this.listModel = opts.listModel ? new SchemaInterpreter(opts.listModel) : undefined
       this.attribute = opts.attribute
       this.transformer = opts.transformer
 
@@ -44,7 +44,7 @@ export class SchemeInterpreter {
   /**
    * Get type of an input
    *
-   * @param {ScrapeTAScheme[K]} scheme
+   * @param {ScrapeTASchema[K]} schema
    * @returns {EOptionType}
    */
   public get type(): EOptionType {
@@ -52,7 +52,7 @@ export class SchemeInterpreter {
     if (!this.listModel) return EOptionType.VALUE
 
     if (
-      this.listModel instanceof SchemeInterpreter &&
+      this.listModel instanceof SchemaInterpreter &&
       Object.keys(this.listModel.children).length > 0
     )
       return EOptionType.OBJECT_ARRAY
@@ -60,7 +60,7 @@ export class SchemeInterpreter {
   }
 
   /**
-   * Validate current SchemeInterpreter object
+   * Validate current SchemaInterpreter object
    *
    * @returns {void}
    * @throws {Error}

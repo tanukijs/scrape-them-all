@@ -1,11 +1,11 @@
 import nodeFetch, { RequestInfo, RequestInit, Response } from 'node-fetch'
-import { SchemeInterpreter } from './SchemeInterpreter'
+import { SchemaInterpreter } from './SchemaInterpreter'
 import { DataModeler } from './DataModeler'
 import { CookieJar } from 'fetch-cookie'
 
-type TSchemeInterpreter = Partial<
+type TSchemaInterpreter = Partial<
   Pick<
-    SchemeInterpreter,
+    SchemaInterpreter,
     'selector' | 'trim' | 'accessor' | 'attribute' | 'transformer' | 'listModel'
   >
 >
@@ -15,15 +15,15 @@ export type ScrapeTAExtraParams = {
   cookieJar?: boolean | CookieJar
 }
 
-export type ScrapeTAScheme = {
-  [key: string]: string | TSchemeInterpreter | ScrapeTAScheme
+export type ScrapeTASchema = {
+  [key: string]: string | TSchemaInterpreter | ScrapeTASchema
 }
 
 export type ScrapeTARequest = RequestInfo | (ScrapeTAExtraParams & RequestInit)
 
 export type ScrapeTAResult<T> = {
   response: Response
-  data: T
+  data: T | Record<string, never>
 }
 
 /**
@@ -46,13 +46,13 @@ async function withCookies(query: ScrapeTAExtraParams): Promise<typeof nodeFetch
  * Get HTML body and transform it as user-designed object
  *
  * @param {ScrapeTARequest} query
- * @param {ScrapeTAScheme} scheme
+ * @param {ScrapeTASchema} schema
  *
  * @returns {Promise<ScrapeTAResult<T>>}
  */
 export async function scrapeTA<T>(
   request: ScrapeTARequest,
-  scheme: ScrapeTAScheme
+  schema: ScrapeTASchema
 ): Promise<ScrapeTAResult<T>> {
   const fetch =
     typeof request === 'object' && 'cookieJar' in request && request.cookieJar
@@ -64,7 +64,7 @@ export async function scrapeTA<T>(
   const response = await fetch(requestInfo, requestInit)
   const responseHTML = await response.text()
   const dataModeler = new DataModeler(responseHTML)
-  const usableScheme = new SchemeInterpreter(scheme)
-  const data = (await dataModeler.generate(usableScheme)) as T
+  const usableSchema = new SchemaInterpreter(schema)
+  const data = (await dataModeler.generate(usableSchema)) as T
   return { response, data }
 }

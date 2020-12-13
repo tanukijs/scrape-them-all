@@ -21,14 +21,17 @@ afterAll((done) => {
 
 describe('Scrape basic data', () => {
   test('Directly target the HTML element', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      title: 'h1.title',
-      description: '.description',
-      date: {
-        selector: '.date',
-        transformer: (x) => new Date(x)
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        title: 'h1.title',
+        description: '.description',
+        date: {
+          selector: '.date',
+          transformer: (x) => new Date(x)
+        }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       title: 'Title',
@@ -38,13 +41,16 @@ describe('Scrape basic data', () => {
   })
 
   test('Use a reserved keyword', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      title: 'h1.title',
-      _attribute: {
-        selector: 'img',
-        attribute: 'src'
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        title: 'h1.title',
+        _attribute: {
+          selector: 'img',
+          attribute: 'src'
+        }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       title: 'Title',
@@ -56,15 +62,18 @@ describe('Scrape basic data', () => {
 
 describe('Scrape list', () => {
   test('With transform', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      features: {
-        selector: '.features',
-        listModel: {
-          selector: 'li',
-          transformer: (x) => parseInt(x, 10)
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        features: {
+          selector: '.features',
+          listModel: {
+            selector: 'li',
+            transformer: (x) => parseInt(x, 10)
+          }
         }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       features: [1, 2, 3, 4, 5, 6]
@@ -72,14 +81,17 @@ describe('Scrape list', () => {
   })
 
   test('Without transform', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      features: {
-        selector: '.features',
-        listModel: {
-          selector: 'li'
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        features: {
+          selector: '.features',
+          listModel: {
+            selector: 'li'
+          }
         }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       features: ['1', '2', '3', '4', '5', '6']
@@ -89,26 +101,29 @@ describe('Scrape list', () => {
 
 describe('Scrape nested object', () => {
   test('Object nested with multiple custom keys', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      nested: {
-        selector: '.nested',
-        foo: {
-          level1: {
-            selector: '.level1',
-            level2: {
-              selector: 'span',
-              accessor: (x) => x.eq(1).text()
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        nested: {
+          selector: '.nested',
+          foo: {
+            level1: {
+              selector: '.level1',
+              level2: {
+                selector: 'span',
+                accessor: (x) => x.eq(1).text()
+              }
+            },
+            level1Text: {
+              selector: 'span'
+            },
+            level2Text: {
+              selector: '.level2'
             }
-          },
-          level1Text: {
-            selector: 'span'
-          },
-          level2Text: {
-            selector: '.level2'
           }
         }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       nested: {
@@ -124,17 +139,20 @@ describe('Scrape nested object', () => {
   })
 
   test('Scrape tables using accessor', async () => {
-    const { response, data } = await scrapeTA(`http://localhost:${port}`, {
-      addresses: {
-        selector: 'table tbody tr',
-        listModel: {
-          address: '.address',
-          city: {
-            accessor: (x) => x.closest('table').find('thead .city').text()
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
+      `http://localhost:${port}`,
+      {
+        addresses: {
+          selector: 'table tbody tr',
+          listModel: {
+            address: '.address',
+            city: {
+              accessor: (x) => x.closest('table').find('thead .city').text()
+            }
           }
         }
       }
-    })
+    )
     expect(response.ok).toBe(true)
     expect(data).toEqual({
       addresses: [
@@ -147,7 +165,7 @@ describe('Scrape nested object', () => {
 
 describe('Scrape using options', () => {
   test('Store redirections using cookieJar option', async () => {
-    const { response, data } = await scrapeTA(
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
       { url: 'http://www.krosmoz.com/en/almanax/2020-01-01', cookieJar: true },
       {
         month: {
@@ -162,7 +180,7 @@ describe('Scrape using options', () => {
   })
 
   test('Get data modified by AJAX using headers option', async () => {
-    const { response, data } = await scrapeTA(
+    const { response, data } = await scrapeTA<Record<string, unknown>>(
       {
         url:
           'https://www.dofus.com/en/mmorpg/encyclopedia/pets/11950-ankascraper?level=100&_pjax=.ak-item-details-container',

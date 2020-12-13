@@ -1,5 +1,5 @@
 import cheerio from 'cheerio'
-import { EOptionType, SchemeInterpreter } from './SchemeInterpreter'
+import { EOptionType, SchemaInterpreter } from './SchemaInterpreter'
 
 export class DataModeler {
   private $root: cheerio.Root
@@ -9,14 +9,14 @@ export class DataModeler {
   }
 
   /**
-   * Generate data from HTML body & user-designed JSON scheme
+   * Generate data from HTML body & user-designed JSON schema
    *
-   * @param {SchemeInterpreter} opts
+   * @param {SchemaInterpreter} opts
    * @param {cheerio.Cheerio} [context]
    *
    * @returns {Promise<unknown>}
    */
-  async generate(opts: SchemeInterpreter, context?: cheerio.Cheerio): Promise<unknown> {
+  async generate(opts: SchemaInterpreter, context?: cheerio.Cheerio): Promise<unknown> {
     const cheerioRoot =
       context && opts.selector
         ? context.find(opts.selector)
@@ -30,7 +30,7 @@ export class DataModeler {
     if (opts.type === EOptionType.OBJECT) {
       const mappedResult = {}
       for (const key in opts.children) {
-        const child = new SchemeInterpreter(opts.children[key])
+        const child = new SchemaInterpreter(opts.children[key])
         mappedResult[key] = await this.generate(child, processed as cheerio.Cheerio)
       }
       return mappedResult
@@ -45,7 +45,7 @@ export class DataModeler {
       const result = method.call(
         this,
         processed as cheerio.Cheerio,
-        opts.listModel as SchemeInterpreter
+        opts.listModel as SchemaInterpreter
       )
       return Promise.all(result)
     }
@@ -57,11 +57,11 @@ export class DataModeler {
    * Process single item
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeInterpreter} opts
+   * @param {SchemaInterpreter} opts
    *
    * @returns {unknown}
    */
-  private processValue(element: cheerio.Cheerio, opts: SchemeInterpreter): unknown {
+  private processValue(element: cheerio.Cheerio, opts: SchemaInterpreter): unknown {
     let value =
       typeof opts.accessor === 'function'
         ? opts.accessor(element)
@@ -80,13 +80,13 @@ export class DataModeler {
    * Process basic list
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeInterpreter} listModel
+   * @param {SchemaInterpreter} listModel
    *
    * @returns {unknown[]}
    */
   private processArray(
     element: cheerio.Cheerio,
-    listModel: SchemeInterpreter
+    listModel: SchemaInterpreter
   ): unknown[] {
     const values = []
     const children = element.find(listModel.selector)
@@ -101,13 +101,13 @@ export class DataModeler {
    * Process list of objects
    *
    * @param {cheerio.Cheerio} element
-   * @param {SchemeInterpreter} listModel
+   * @param {SchemaInterpreter} listModel
    *
    * @returns {Promise<unknown>[]}
    */
   private processObjectArray(
     element: cheerio.Cheerio,
-    listModel: SchemeInterpreter
+    listModel: SchemaInterpreter
   ): Promise<unknown>[] {
     const values = []
     for (let i = 0; i < element.length; i++) {
